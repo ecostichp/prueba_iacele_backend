@@ -1,6 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime as sql_DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
 from passlib.hash import bcrypt
 
 from .orm import Base

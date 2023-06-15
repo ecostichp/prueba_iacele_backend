@@ -36,14 +36,24 @@ env\Scripts\activate
 ### 4. Actualiza PIP en tu entorno e instala las dependencias del proyecto.
 ```
 python -m pip install -U Pip  
-python -m pip install -U FastAPI[all] PassLib[bcrypt] PyJWT SQLAlchemy
+python -m pip install -r requirements.txt
 ```
 
 ### 5. Inicia el servidor.
+
+Sitúate dentro de la carpeta app/
+
 ```
-uvicorn app.main:app --reload
+uvicorn main:app --reload
 ```
 Si quieres iniciar el servidor en otro host (ej: 192.168.1.82):
 ```
-uvicorn app.main:app --reload  --host 192.168.1.82
+uvicorn main:app --reload  --host 192.168.1.82
 ```
+
+
+
+
+
+# El Motor de Base de Datos.
+Se va a utilizar SQLite como el motor de la base de datos. Puedes configurar nombre y dirección de esta base de datos dentro del archivo 'app/database/orm.py'.

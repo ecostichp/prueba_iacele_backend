@@ -24,9 +24,6 @@ app.add_middleware(
 from .router_authentication import router as router_authentication
 app.include_router(router_authentication)
 
-from .router_lead import router as router_lead
-app.include_router(router_lead)
-
 
 
 @app.get("/")

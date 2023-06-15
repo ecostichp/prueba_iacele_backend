@@ -19,6 +19,13 @@ async def get_user(user:str, db: Session):
 
 
 
+async def get_users(db: Session):
+    users = db.query(model.User).all()
+
+    return list(map(schema.User.from_orm, users))
+
+
+
 async def create_user(schema:schema.UserCreate, db: Session):
     user_obj = model.User(
         user = schema.user,
