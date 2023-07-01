@@ -1,19 +1,42 @@
-# Ejercicio 01 de FullStacK
-
-Para generar esta aplicación FullStack me basé casi en su totalidad a la aplicación de Sixfwa en el canal de Youtube Rithmic. El video de [YouTube](https://youtu.be/UbSONbZ8t4g) y el código [GitHub](https://github.com/sixfwa/react-fastapi) son públicos.
+# Aplicación prueba FullStack IACele
 
 
-Mi aplicación queda de la siguiente manera:
+## Descripción de la aplicación
+
+La aplicación es de prueba, pero es funcional. No tiene nada de "lógica de negocios" todía. Sin embargo la lógica de programación está casí completa.
+
+
+
+El código es público:
+ -El código del backend está en [GitHub](https://github.com/ecostichp/inventario_app_backend)
+ -El código del frontend está en [GitHub](https://github.com/ecostichp/prueba_iacele_frontend)
+
+
+
+La estructura de la aplicación queda de la siguiente manera:
+
 1.- Backend FastAPI
-2.- Frontend ReactJS
-3.- Database Motor SQLite
-4.- ORM SQLAlchemy.
+  1.1.- Hosting: Google Cloud Run (con Docker)
+  1.2.- ORM: SQLAlchemy
 
-A diferencia de Rithmic, yo cree el proyecto con VITE. Además incluí "Axios" para las peticiones al backend y para el CSS incluí "TailwindCSS".
+2.- Database Motor SQLite
+  2.1.- Hosting: dentro del contenedor Docker del backend
+
+
+3.- Frontend ReactJS
+  3.1.- Hosting: Vercel
+  3.2.- Ruteador: React-Router-Dom
+  3.3.- Peticiones HTTP: Axios
+  3.4.- CSS: TailwindCSS
+  3.4.- UI components: TailwindUI
 
 
 
-# El Backend
+
+
+## El Backend
+
+Este repositorio sólo abarca la parte del backend
 
 
 ### 1. Actualiza PIP en python.
