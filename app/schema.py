@@ -1,10 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from datetime import datetime
 
 
 
 class UserBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     user: str
     name: str
     position: str
@@ -13,13 +15,9 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-    class Config:
-        orm_mode = True
 
 class User(UserBase):
     id: int
     hashed_password: str
 
-    class Config:
-        orm_mode = True
         
