@@ -1,6 +1,6 @@
 import psycopg2
 
-from orm import DATABASE_DEV
+from config import dbConfig
 
 
 
@@ -11,14 +11,14 @@ def connect_to_dev_db():
 
         # connect to the PostgreSQL server
         print('Connecting to the PostgreSQL database...')
-        conn = psycopg2.connect(**DATABASE_DEV)
+        conn = psycopg2.connect(**dbConfig)
 		
         # create a cursor
         cur = conn.cursor()
         
 	# execute a statement
         print('¡Connection succes! PostgreSQL database version:')
-        cur.execute(f"SELECT row_to_json(t) FROM (SELECT * FROM pg_stat_activity WHERE datname='{DATABASE_DEV['database']}') t")
+        cur.execute(f"SELECT row_to_json(t) FROM (SELECT * FROM pg_stat_activity WHERE datname='{dbConfig['database']}') t")
 
         # display the PostgreSQL database server version
         all_activity = cur.fetchall()

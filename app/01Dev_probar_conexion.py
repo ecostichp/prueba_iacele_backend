@@ -1,7 +1,6 @@
 import psycopg2
 
-from orm import DATABASE_DEV
-
+from config import dbConfig
 
 
 def connect_to_dev_db():
@@ -11,7 +10,7 @@ def connect_to_dev_db():
 
         # connect to the PostgreSQL server
         print('\nTratando de conectarse a PostgreSQL, de manera remota en Google Cloud SQL...')
-        conn = psycopg2.connect(**DATABASE_DEV)
+        conn = psycopg2.connect(**dbConfig)
 		
         # create a cursor
         cur = conn.cursor()
