@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 
 DATABASE_DEV = {
-        'host' : "34.102.109.234",
+        'host' : "prueba-iacele:us-west2:prueba-iacele",
         'database': "iaCeleDB",
         'user':"iaCele",
         'password':"iaCele123456"
