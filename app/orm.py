@@ -1,17 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
+from .config import settings
 
 
 
-DATABASE_DEV = {
-        'host' : "34.102.109.234",
-        'database': "iaCeleDB",
-        'user':"iaCele",
-        'password':"iaCele123456"
-        }
-
-DATABASE_URL = f"postgresql+psycopg2://{DATABASE_DEV['user']}:{DATABASE_DEV['password']}@{DATABASE_DEV['host']}/{DATABASE_DEV['database']}"
+DATABASE_URL = f"postgresql+psycopg2://{settings.gcloud_sql_user}:{settings.gcloud_sql_password}@{settings.gcloud_sql_host}/{settings.gcloud_sql_db}"
 engine = create_engine( DATABASE_URL )
 
 
