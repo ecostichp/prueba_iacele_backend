@@ -6,12 +6,20 @@ FROM python:3.11-slim
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
 
+# install psycopg dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set the current working directory to the container image and copy requirements.txt
 WORKDIR /backend
-COPY ./requirements.txt /backend/requirements.txt
+
+# Update pip.
+RUN pip install --no-cache-dir -U pip
 
 # Install production dependencies.
-RUN pip install --no-cache-dir -U pip
+COPY ./requirements.txt /backend/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy local code to the container image.
