@@ -20,7 +20,7 @@ data = URL.create(
     username = settings.gcloud_sql_user,
     password = settings.gcloud_sql_password,
     database = settings.gcloud_sql_db,
-    query={"unix_socket": settings.gcloud_sql_host},
+    query={"unix_socket": f'/cloudsql/{settings.gcloud_sql_host}/.s.PGSQL.5432'},
 )
 
 engine = create_engine( data )
