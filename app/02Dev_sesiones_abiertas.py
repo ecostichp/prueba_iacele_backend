@@ -1,41 +1,46 @@
-import psycopg2
+import asyncio
+import asyncpg
+from dateutil import tz
 
 from config import dbConfig
 
 
 
-def connect_to_dev_db():
-    """ Connect to the PostgreSQL database server """
+async def open_sessions_PostgreSQL():
+    """ Get open sessions to a particular DB in PostgreSQL """
+
     conn = None
     try:
-
         # connect to the PostgreSQL server
-        print('Connecting to the PostgreSQL database...')
-        conn = psycopg2.connect(**dbConfig)
+        print('\n Iniciando conexión a la base de datos PostgreSQL en el servidor de Google Cloud...')
+        conn = await asyncpg.connect(**dbConfig)
 		
-        # create a cursor
-        cur = conn.cursor()
-        
-	# execute a statement
-        print('¡Connection succes! PostgreSQL database version:')
-        cur.execute(f"SELECT row_to_json(t) FROM (SELECT * FROM pg_stat_activity WHERE datname='{dbConfig['database']}') t")
-
-        # display the PostgreSQL database server version
-        all_activity = cur.fetchall()
-        print('\n\nHay', len(all_activity), 'actividades')
+	    # execute a statement
+        all_activity = await conn.fetch(f"SELECT * FROM pg_stat_activity WHERE datname='{dbConfig['database']}'")
+        print(f"\n>>> ¡Conexión exitosa! Las sesiones en la base de datos {dbConfig['database']} son:")
+        print('\n\nHay', len(all_activity), 'actividades:')
+        i = 1
         for activity in all_activity:
-            print('\n\n<> ',activity)
+            act = dict(activity)
+            print(f'\n<Actividad {i}>')
+            print('   ','Usuario:',act['usename'])
+            print('   ','Dirección IP:',act['client_addr'])
+            print('   ','Query:',act['query'])
+            print('   ','Fecha Local del Query:',act['query_start'].astimezone(tz.tzlocal()))
+            i += 1
        
-	# close the communication with the PostgreSQL
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as err:
+    except Exception as err:
+        # Catch the error
+        print('\n>>> ¡Hubo un error con la conexión!:')
         print(err)
+        print('\n')
     
     finally:
+        # close the communication with the PostgreSQL
         if conn is not None:
-            conn.close()
-            print('\n\nSon todas las sesiones de actividad.\n')
+            await conn.close()
+            print('\n\nSon todas las sesiones de actividad. Se cerró la conexión a la base de datos.\n')
 
 
 if __name__ == '__main__':
-    connect_to_dev_db()
+    asyncio.get_event_loop().run_until_complete(open_sessions_PostgreSQL())

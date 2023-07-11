@@ -1,38 +1,37 @@
-import psycopg2
+import asyncio
+import asyncpg
 
 from config import dbConfig
 
 
-def connect_to_dev_db():
+
+async def connect_to_PostgreSQL():
+    """ Connect to the PostgreSQL database server """
 
     conn = None
     try:
-
         # connect to the PostgreSQL server
-        print('\nTratando de conectarse a PostgreSQL, de manera remota en Google Cloud SQL...')
-        conn = psycopg2.connect(**dbConfig)
-		
-        # create a cursor
-        cur = conn.cursor()
-        
-	# execute a statement
-        print('>>> ¡Conexión exitosa! La versión de la base de datos de PostgreSQL es:')
-        cur.execute('SELECT version()')
+        print('\n Iniciando conexión a la base de datos PostgreSQL en el servidor de Google Cloud...')
+        conn = await asyncpg.connect(**dbConfig)
 
-        # display the PostgreSQL database server version
-        db_version = cur.fetchall()
-        print(db_version)
-       
-	# close the communication with the PostgreSQL
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as err:
-        print(err)
+        # execute a statement
+        db_version = await conn.fetch('SELECT version()')
+        print('\n>>> ¡Conexión exitosa! La versión de PostgreSQL es:')
+        print('   ',db_version[0])
     
+    except Exception as err:
+        # Catch the error
+        print('\n>>> ¡Hubo un error con la conexión!:')
+        print(err)
+        print('\n')
+
     finally:
+        # close the communication with the PostgreSQL
         if conn is not None:
-            conn.close()
-            print('Se cerró la conexión a la base de datos.\n')
+            await conn.close()
+            print('\nSe cerró la conexión a la base de datos.\n')
+
 
 
 if __name__ == '__main__':
-    connect_to_dev_db()
+    asyncio.get_event_loop().run_until_complete(connect_to_PostgreSQL())
