@@ -12,6 +12,7 @@ from .config import settings
 
 
 
+
 # helper function to return SQLAlchemy connection pool
 def init_connection_pool(connector: Connector) -> Engine:
     # Python Connector database connection function
@@ -22,7 +23,6 @@ def init_connection_pool(connector: Connector) -> Engine:
             user= settings.gcloud_sql_user,
             password= settings.gcloud_sql_password,
             db= settings.gcloud_sql_db,
-            ip_type= IPTypes.PUBLIC  # IPTypes.PRIVATE for private IP
         )
         return conn
 

@@ -3,7 +3,9 @@ import asyncpg
 
 from config import dbConfig
 
+import os
 
+print(os.getenv('GCLOUD_SQL_USER'))
 
 async def connect_to_PostgreSQL():
     """ Connect to the PostgreSQL database server """
