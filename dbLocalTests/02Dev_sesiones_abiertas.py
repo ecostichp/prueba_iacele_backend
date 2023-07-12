@@ -2,7 +2,7 @@ import asyncio
 import asyncpg
 from dateutil import tz
 
-from config import dbConfigLocal
+from dbConnect import dbConfig
 
 
 
@@ -13,11 +13,11 @@ async def open_sessions_PostgreSQL():
     try:
         # connect to the PostgreSQL server
         print('\n Iniciando conexión a la base de datos PostgreSQL en el servidor de Google Cloud...')
-        conn = await asyncpg.connect(**dbConfigLocal)
+        conn = await asyncpg.connect(**dbConfig)
 		
 	    # execute a statement
-        all_activity = await conn.fetch(f"SELECT * FROM pg_stat_activity WHERE datname='{dbConfigLocal['database']}'")
-        print(f"\n>>> ¡Conexión exitosa! Las sesiones en la base de datos {dbConfigLocal['database']} son:")
+        all_activity = await conn.fetch(f"SELECT * FROM pg_stat_activity WHERE datname='{dbConfig['database']}'")
+        print(f"\n>>> ¡Conexión exitosa! Las sesiones en la base de datos {dbConfig['database']} son:")
         print('\n\nHay', len(all_activity), 'actividades:')
         i = 1
         for activity in all_activity:

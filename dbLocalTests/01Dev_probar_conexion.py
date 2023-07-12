@@ -1,7 +1,7 @@
 import asyncio
 import asyncpg
 
-from config import dbConfigLocal
+from dbConnect import dbConfig
 
 
 
@@ -12,7 +12,7 @@ async def connect_to_PostgreSQL():
     try:
         # connect to the PostgreSQL server
         print('\n Iniciando conexión a la base de datos PostgreSQL en el servidor de Google Cloud...')
-        conn = await asyncpg.connect(**dbConfigLocal)
+        conn = await asyncpg.connect(**dbConfig)
 
         # execute a statement
         db_version = await conn.fetch('SELECT version()')
