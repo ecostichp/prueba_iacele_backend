@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from google.cloud.sql.connector import Connector, IPTypes
+from google.cloud.sql.connector import Connector
 
 from .config import settings
 

@@ -9,6 +9,12 @@ ENV PYTHONUNBUFFERED True
 # Set the current working directory to the container image and copy requirements.txt
 WORKDIR /backend
 
+# install psycopg dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Update pip.
 RUN pip install --no-cache-dir -U pip
 
