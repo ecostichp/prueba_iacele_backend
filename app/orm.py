@@ -19,14 +19,14 @@ def init_connection_pool(connector: Connector) -> Engine:
     def getconn():
         conn = connector.connect(
             settings.gcloud_sql_name, # Cloud SQL Instance Connection Name
-            "pg8000",
+            "psycopg2",
             user= settings.gcloud_sql_user,
             password= settings.gcloud_sql_password,
             db= settings.gcloud_sql_db,
         )
         return conn
 
-    SQLALCHEMY_DATABASE_URL = "postgresql+pg8000://"
+    SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://"
 
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL , creator=getconn
