@@ -1,6 +1,5 @@
 import psycopg2
-from dateutil import tz
-import dateutil.parser
+from dateutil import tz, parser
 
 from dbConnect import dbConfigLocal
 
@@ -33,7 +32,7 @@ def open_sessions_PostgreSQL():
             print('   ','Usuario:',act['usename'])
             print('   ','Dirección IP:',act['client_addr'])
             print('   ','Query:',act['query'])
-            print('   ','Fecha Local del Query:', dateutil.parser.isoparse(act['query_start']).astimezone(tz.tzlocal()))
+            print('   ','Fecha Local del Query:', parser.isoparse(act['query_start']).astimezone(tz.tzlocal()))
             i += 1
 
         # close the cursor
