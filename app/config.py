@@ -11,3 +11,13 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()
+
+
+
+dbConfig = {
+        'drivername': "postgresql+psycopg2",
+        'host' : settings.gcloud_sql_name,
+        'database': settings.gcloud_sql_db,
+        'user': settings.gcloud_sql_user,
+        'password': settings.gcloud_sql_password
+        }
