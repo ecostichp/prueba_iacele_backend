@@ -2,7 +2,7 @@ import psycopg2
 from dateutil import tz
 import dateutil.parser
 
-from dbConnect import dbConfig
+from dbConnect import dbConfigLocal
 
 
 
@@ -13,17 +13,17 @@ def open_sessions_PostgreSQL():
     try:
         # connect to the PostgreSQL server
         print('\n Iniciando conexión a la base de datos PostgreSQL en el servidor de Google Cloud...')
-        conn = psycopg2.connect(**dbConfig)
+        conn = psycopg2.connect(**dbConfigLocal)
 
         # create a cursor
         cur = conn.cursor()
 		
 	    # execute a statement
-        cur.execute(f"SELECT row_to_json(t) FROM (SELECT * FROM pg_stat_activity WHERE datname='{dbConfig['database']}') t")
+        cur.execute(f"SELECT row_to_json(t) FROM (SELECT * FROM pg_stat_activity WHERE datname='{dbConfigLocal['database']}') t")
 
         # fetch the results
         all_activity = cur.fetchall()
-        print(f"\n>>> ¡Conexión exitosa! Las sesiones en la base de datos {dbConfig['database']} son:")
+        print(f"\n>>> ¡Conexión exitosa! Las sesiones en la base de datos {dbConfigLocal['database']} son:")
         print('\n\nHay', len(all_activity), 'actividades:')
 
         i = 1

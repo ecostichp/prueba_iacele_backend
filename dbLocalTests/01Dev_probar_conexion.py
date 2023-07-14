@@ -1,6 +1,6 @@
 import psycopg2
 
-from dbConnect import dbConfig
+from dbConnect import dbConfigLocal
 
 
 
@@ -11,7 +11,7 @@ def connect_to_PostgreSQL():
     try:
         # connect to the PostgreSQL server
         print('\n Iniciando conexión a la base de datos PostgreSQL en el servidor de Google Cloud...')
-        conn = psycopg2.connect(**dbConfig)
+        conn = psycopg2.connect(**dbConfigLocal)
 
         # create a cursor
         cur = conn.cursor()

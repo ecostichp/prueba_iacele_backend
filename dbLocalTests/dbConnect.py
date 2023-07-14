@@ -4,7 +4,7 @@ gcloud_sql_user = "licCostich"
 gcloud_sql_password = "Lic@123456"
 
 
-dbConfig = {
+dbConfigLocal = {
         'host' : gcloud_sql_host,
         'database': gcloud_sql_db,
         'user': gcloud_sql_user,
