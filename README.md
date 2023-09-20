@@ -19,8 +19,11 @@ La estructura de la aplicación queda de la siguiente manera:
   1.1.- Hosting: Google Cloud Run (con Docker)
   1.2.- ORM: SQLAlchemy
 
-2.- Database Motor SQLite
-  2.1.- Hosting: dentro del contenedor Docker del backend
+2A.- Database Motor para Producción: PostgreSQL
+  2A.1.- Hosting: Google Cloud SQL
+
+2B.- Database Motor para Testing: SQLite
+  2B.1.- Hosting: Local
 
 
 3.- Frontend ReactJS
@@ -79,4 +82,27 @@ uvicorn app.main:app --reload  --host 192.168.1.82
 
 
 # El Motor de Base de Datos.
-Se va a utilizar SQLite como el motor de la base de datos. Puedes configurar nombre y dirección de esta base de datos dentro del archivo 'app/database/orm.py'.
+El proyecto sólo usa 2 motores de bases de datos:
+
+Para producción y desarrollo se va a utilizar PostgreSQL. La database se aloja en los servidores de GCloud.
+
+Para testing se va a utilizar SQLite. La database se aloja de manera Local y puedes configurar nombre y dirección de la misma dentro del archivo 'app/database/orm.py'.
+
+
+
+En el archivo 'app/database/orm.py' hay 3 configuraciones al 'engine' del ORM para correr la aplicación:
+
+  1.- Modo Producción: 
+    a) Backend de manera remota, alojado en GCloud Run.
+    b) Database de manera remota (PostgreSQL), alojado en GCloud SQL. 
+    c) La comunicación entre ellos hace de manera local (Configuración especial que se hace posible al tener ambos servidores en la misma nube).
+  
+  2.- Modo Desarrollo:
+    a) Backend de manera local.
+    b) Database de manera remota (PostgreSQL), alojado en GCloud SQL.
+    c) La comunicación entre ellos hace de manera remota.
+
+  3.- Modo Testing:
+    a) Backend de manera local.
+    b) Database de manera local (SQLite).
+    c) La comunicación entre ellos hace de manera local.
