@@ -45,15 +45,15 @@ python -m pip install -U Pip
 ```
 
 ### 2. Crea un entorno para el proyecto.
-En este ejemplo, el entorno se llamará "env"
+En este ejemplo, el entorno se llamará "env-iaCeleApp"
 
 ```
-python -m venv env
+python -m venv env-iaCeleApp
 ```
 
 ### 3. Activa el entorno.
 ```
-env\Scripts\activate
+env-iaCeleApp\Scripts\activate
 ```
 
 ### 4. Actualiza PIP en tu entorno e instala las dependencias del proyecto.
@@ -64,14 +64,14 @@ python -m pip install -r requirements.txt
 
 ### 5. Inicia el servidor.
 
-Sitúate dentro de la carpeta app/
+Sitúate dentro de la carpeta del backend: PRUEBA_IACELE_BACKEND/
 
 ```
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 Si quieres iniciar el servidor en otro host (ej: 192.168.1.82):
 ```
-uvicorn main:app --reload  --host 192.168.1.82
+uvicorn app.main:app --reload  --host 192.168.1.82
 ```
 
 
