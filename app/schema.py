@@ -3,7 +3,6 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 
-
 class UserBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -12,6 +11,7 @@ class UserBase(BaseModel):
     position: str
     avatar: str
 
+
 class UserCreate(UserBase):
     password: str
 
@@ -19,5 +19,3 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     hashed_password: str
-
-        

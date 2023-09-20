@@ -3,7 +3,6 @@ import psycopg2
 from dbConnect import dbConfigLocal
 
 
-
 def connect_to_PostgreSQL():
     """ Connect to the PostgreSQL database server """
 
@@ -22,11 +21,11 @@ def connect_to_PostgreSQL():
         # fetch the results
         db_version = cur.fetchall()
         print('\n>>> ¡Conexión exitosa! La versión de PostgreSQL es:')
-        print('   ',db_version[0][0])
+        print('   ', db_version[0][0])
 
         # close the cursor
         cur.close()
-    
+
     except Exception as err:
         # Catch the error
         print('\n>>> ¡Hubo un error con la conexión!:')
@@ -38,7 +37,6 @@ def connect_to_PostgreSQL():
         if conn is not None:
             conn.close()
             print('\nSe cerró la conexión a la base de datos.\n')
-
 
 
 if __name__ == '__main__':

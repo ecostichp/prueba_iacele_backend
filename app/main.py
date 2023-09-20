@@ -1,10 +1,12 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
+from .router_authentication import router as router_authentication
+from .orm import Base, engine
 
 
 app = FastAPI()
 
-from fastapi.middleware.cors import CORSMiddleware
 
 origins = [
     "http://127.0.0.1:5173",
@@ -20,9 +22,7 @@ app.add_middleware(
 )
 
 
-from .router_authentication import router as router_authentication
 app.include_router(router_authentication)
-
 
 
 @app.get("/")
@@ -32,6 +32,4 @@ async def home():
     return home
 
 
-
-from .orm import Base, engine
-Base.metadata.create_all(bind = engine)
+Base.metadata.create_all(bind=engine)

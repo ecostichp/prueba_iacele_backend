@@ -5,13 +5,11 @@ gcloud_sql_password = "Lic@123456"
 
 
 dbConfigLocal = {
-        'host' : gcloud_sql_host,
-        'database': gcloud_sql_db,
-        'user': gcloud_sql_user,
-        'password': gcloud_sql_password
-        }
-
-
+    'host': gcloud_sql_host,
+    'database': gcloud_sql_db,
+    'user': gcloud_sql_user,
+    'password': gcloud_sql_password
+}
 
 
 # GRANT SELECT, INSERT, UPDATE, DELETE ON usuarios, clientes, productos, proveedores TO iacele_app;

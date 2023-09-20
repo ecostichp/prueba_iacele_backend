@@ -22,16 +22,13 @@ from .config import dbConfig
 # Para correr la aplicación en en GCloud Run (modo Production) contenerizada en Docker,
 # con la base de datos de producción PostgreSQL en Gcloud,
 # por medio de de la conexción local Unix_Socket.
-engine = create_engine( URL.create(**dbConfig) )
-
+engine = create_engine(URL.create(**dbConfig))
 
 
 Base = declarative_base()
 
 
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 
 
 def get_db():
