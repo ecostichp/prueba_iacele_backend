@@ -18,6 +18,7 @@ La estructura de la aplicación queda de la siguiente manera:
 1.- Backend FastAPI
   1.1.- Hosting: Google Cloud Run (con Docker)
   1.2.- ORM: SQLAlchemy
+  1.3.- Psycopg2: Adaptador para la base de datos PostgreSQL
 
 2A.- Database Motor para Producción: PostgreSQL
   2A.1.- Hosting: Google Cloud SQL

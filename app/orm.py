@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from .config import dbConfig
 
 
-# ### ---> Modo Testing:
+# # ---> Modo Testing:
 # # Aplicación en modo Local.
 # # Base de datos Local SQLite.
 # # Conexión local entre aplicación y database.
@@ -13,7 +13,7 @@ from .config import dbConfig
 # engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
 
-# ### ---> Modo Development:
+# # ---> Modo Development:
 # # Aplicación en modo Local.
 # # Base de datos remota PostgreSQL en GCloudSQL.
 # # Conexión remota entre aplicación y database.
