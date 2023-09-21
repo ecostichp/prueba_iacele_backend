@@ -87,23 +87,23 @@ El proyecto sólo usa 2 motores de bases de datos:
 
 Para producción y desarrollo se va a utilizar PostgreSQL. La database se aloja en los servidores de GCloud.
 
-Para testing se va a utilizar SQLite. La database se aloja de manera Local y puedes configurar nombre y dirección de la misma dentro del archivo 'app/database/orm.py'.
+Para experimentación se va a utilizar SQLite. La database se aloja de manera Local y puedes configurar nombre y dirección de la misma dentro del archivo 'app/database/orm.py'.
 
 
 
 En el archivo 'app/database/orm.py' hay 3 configuraciones al 'engine' del ORM para correr la aplicación:
 
-  1.- Modo Producción: 
+  1.- Production Mode: 
     a) Backend de manera remota, alojado en GCloud Run.
     b) Database de manera remota (PostgreSQL), alojado en GCloud SQL. 
     c) La comunicación entre ellos hace de manera local (Configuración especial que se hace posible al tener ambos servidores en la misma nube).
   
-  2.- Modo Desarrollo:
+  2.- Development Mode:
     a) Backend de manera local.
     b) Database de manera remota (PostgreSQL), alojado en GCloud SQL.
     c) La comunicación entre ellos hace de manera remota.
 
-  3.- Modo Testing:
+  3.- Experimental Mode:
     a) Backend de manera local.
     b) Database de manera local (SQLite).
     c) La comunicación entre ellos hace de manera local.
