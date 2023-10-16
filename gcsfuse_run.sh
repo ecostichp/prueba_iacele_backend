@@ -10,4 +10,4 @@ echo "Mounting completed."
 
 
 # Run the web service on container startup. Here we use the gunicorn
-CMD exec uvicorn app.main:app --host 0.0.0.0 --port 8080
+exec uvicorn app.main:app --host 0.0.0.0 --port 8080
