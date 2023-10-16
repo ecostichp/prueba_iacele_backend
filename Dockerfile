@@ -19,9 +19,10 @@ RUN set -e; \
     tini \
     lsb-release; \
     gcsFuseRepo=gcsfuse-`lsb_release -c -s`; \
-    echo "deb https://packages.cloud.google.com/apt $gcsFuseRepo main" | \
     tee /etc/apt/sources.list.d/gcsfuse.list; \
+    echo "\n vamos bien"
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    echo "ya no se pudo más"
     apt-key add -; \
     apt-get update; \
     apt-get install -y gcsfuse \
