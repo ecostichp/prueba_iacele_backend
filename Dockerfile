@@ -20,9 +20,9 @@ RUN set -e; \
     lsb-release; \
     gcsFuseRepo=gcsfuse-`lsb_release -c -s`; \
     tee /etc/apt/sources.list.d/gcsfuse.list; \
-    echo "\n vamos bien"
+    echo "\n vamos bien" | \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
-    echo "ya no se pudo más"
+    echo "ya no se pudo más" | \
     apt-key add -; \
     apt-get update; \
     apt-get install -y gcsfuse \
