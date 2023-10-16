@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .router_authentication import router as router_authentication
-from .orm import Base, engine
 
 
 app = FastAPI()
@@ -22,38 +20,20 @@ app.add_middleware(
 )
 
 
+from .router_authentication import router as router_authentication
 app.include_router(router_authentication)
 
+from .router_file_management import router as router_file_management
+app.include_router(router_file_management)
 
+
+
+from .orm import Base, engine
 @app.get("/")
 async def home():
     home = {"message": "Conexión exitosa con el servidor"}
 
     return home
-
-
-from pathlib import Path
-from fastapi import UploadFile
-import shutil
-
-
-@app.post("/uploadfiles/")
-async def create_upload_file(file: UploadFile):
-    upload_dir = Path.joinpath(Path.cwd(), "uploadfiles")
-
-    upload_dir.mkdir(parents=True, exist_ok=True)
-
-    # get the destination path
-    dest = Path.joinpath(upload_dir, file.filename)
-    
-    print(dest)
-
-    # copy the file contents
-    with open(dest, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    return {"filename": file.filename}
-
 
 
 

@@ -6,8 +6,6 @@ FROM python:3.11-slim
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
 
-# Set the current working directory to the container image and copy requirements.txt
-WORKDIR /backend
 
 # install psycopg dependencies
 RUN apt-get update && apt-get install -y \
@@ -15,15 +13,46 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Update pip.
-RUN pip install --no-cache-dir -U pip
+# Install system dependencies
+RUN set -e; \
+    apt-get update -y && apt-get install -y \
+    tini \
+    lsb-release; \
+    gcsFuseRepo=gcsfuse-`lsb_release -c -s`; \
+    echo "deb http://packages.cloud.google.com/apt $gcsFuseRepo main" | \
+    tee /etc/apt/sources.list.d/gcsfuse.list; \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    apt-key add -; \
+    apt-get update; \
+    apt-get install -y gcsfuse \
+    && apt-get clean
 
-# Install production dependencies.
-COPY ./requirements.txt /backend/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Set fallback mount directory
+ENV MNT_DIR /mnt/gcsfuse
+
+# Set the current working directory to the container image
+WORKDIR /backend
 
 # Copy local code to the container image.
 COPY ./app /backend/app
 
-# Run the web service on container startup. Here we use the gunicorn
-CMD exec uvicorn app.main:app --host 0.0.0.0 --port 8080
+
+# Update pip.
+RUN pip install --no-cache-dir -U pip
+
+# Copy requirements.txt and install production dependencies.
+COPY ./requirements.txt /backend/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+# Ensure the script is executable
+RUN chmod +x /app/gcsfuse_run.sh
+
+# Use tini to manage zombie processes and signal forwarding
+# https://github.com/krallin/tini
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+# Copy and pass the startup script as arguments to Tini
+COPY ./gcsfuse_run.sh /backend/gcsfuse_run.sh
+CMD ["/app/gcsfuse_run.sh"]
