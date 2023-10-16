@@ -7,26 +7,26 @@ FROM python:3.11-buster
 ENV PYTHONUNBUFFERED True
 
 
-# install psycopg dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install system dependencies
 RUN set -e; \
     apt-get update -y && apt-get install -y \
     tini \
     lsb-release; \
     gcsFuseRepo=gcsfuse-`lsb_release -c -s`; \
-    echo "\n\n\nwepppp" | \
+    echo "deb https://packages.cloud.google.com/apt $gcsFuseRepo main" | \
     tee /etc/apt/sources.list.d/gcsfuse.list; \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
     apt-key add -; \
     apt-get update; \
     apt-get install -y gcsfuse \
     && apt-get clean
-    
+
+# install psycopg dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*    
+
 
 # Set fallback mount directory
 ENV MNT_DIR /mnt/gcsfuse
