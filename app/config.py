@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     gcloud_sql_db: str
     gcloud_sql_user: str
     gcloud_sql_password: str
+    bucket_name: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
