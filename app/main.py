@@ -32,4 +32,29 @@ async def home():
     return home
 
 
+from pathlib import Path
+from fastapi import UploadFile
+import shutil
+
+
+@app.post("/uploadfiles/")
+async def create_upload_file(file: UploadFile):
+    upload_dir = Path.joinpath(Path.cwd(), "uploadfiles")
+
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    # get the destination path
+    dest = Path.joinpath(upload_dir, file.filename)
+    
+    print(dest)
+
+    # copy the file contents
+    with open(dest, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {"filename": file.filename}
+
+
+
+
 Base.metadata.create_all(bind=engine)
