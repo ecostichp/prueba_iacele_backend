@@ -46,13 +46,13 @@ COPY ./requirements.txt /backend/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 
-# Ensure the script is executable
-RUN chmod +x /app/gcsfuse_run.sh
+# Copy and ensure the script is executable
+COPY ./gcsfuse_run.sh /backend/gcsfuse_run.sh
+RUN chmod +x /backend/gcsfuse_run.sh
 
 # Use tini to manage zombie processes and signal forwarding
 # https://github.com/krallin/tini
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
-# Copy and pass the startup script as arguments to Tini
-COPY ./gcsfuse_run.sh /backend/gcsfuse_run.sh
-CMD ["/app/gcsfuse_run.sh"]
+# Pass the startup script as arguments to Tini
+CMD ["/backend/gcsfuse_run.sh"]
