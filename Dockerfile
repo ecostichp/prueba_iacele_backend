@@ -1,11 +1,17 @@
 
 # Use the official lightweight Python image.
 # https://hub.docker.com/_/python
-FROM python:3.11-slim
+FROM python:3.11-buster
 
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
 
+
+# install psycopg dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install system dependencies
 RUN set -e; \
@@ -13,7 +19,7 @@ RUN set -e; \
     tini \
     lsb-release; \
     gcsFuseRepo=gcsfuse-`lsb_release -c -s`; \
-    echo "deb https://packages.cloud.google.com/apt $gcsFuseRepo main" | \
+    echo "\n\n\nwepppp" | \
     tee /etc/apt/sources.list.d/gcsfuse.list; \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
     apt-key add -; \
@@ -21,12 +27,6 @@ RUN set -e; \
     apt-get install -y gcsfuse \
     && apt-get clean
     
-# install psycopg dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 
 # Set fallback mount directory
 ENV MNT_DIR /mnt/gcsfuse
