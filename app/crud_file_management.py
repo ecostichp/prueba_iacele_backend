@@ -19,5 +19,8 @@ async def save_files(files):
         # copy the file contents
         with open(dest, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+        
+        print("\nSe subió el archivo:", file.filename)
+        print("En el Path", dest)
 
     return {"filenames": [file.filename for file in files]}
