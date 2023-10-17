@@ -14,7 +14,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,6 +36,17 @@ async def home():
 
     return home
 
+
+from pathlib import Path
+@app.get("/path")
+async def path():
+
+    wep = Path.cwd()
+    direct = list(wep.iterdir())
+
+    mensaje = {"wep": wep, 'direct':direct}
+
+    return mensaje
 
 
 Base.metadata.create_all(bind=engine)
