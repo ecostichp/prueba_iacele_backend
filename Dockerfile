@@ -28,11 +28,11 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*    
 
 
-# Set fallback mount directory
-ENV MNT_DIR /mnt/gcsfuse
-
 # Set the current working directory to the container image
 WORKDIR /backend
+
+# Set fallback mount directory
+ENV MNT_DIR /backend/uploadfiles
 
 # Copy local code to the container image.
 COPY ./app /backend/app
