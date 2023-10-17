@@ -50,12 +50,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./gcsfuse_run.sh /backend/gcsfuse_run.sh
 RUN chmod +x /backend/gcsfuse_run.sh
 
-# # Use tini to manage zombie processes and signal forwarding
-# # https://github.com/krallin/tini
-# ENTRYPOINT ["/usr/bin/tini", "--"]
+# Use tini to manage zombie processes and signal forwarding
+# https://github.com/krallin/tini
+ENTRYPOINT ["/usr/bin/tini", "--"]
 
-# # Pass the startup script as arguments to Tini
-# CMD ["/backend/gcsfuse_run.sh"]
-
-# Run the web service on container startup. Here we use the gunicorn
-CMD exec uvicorn app.main:app --host 0.0.0.0 --port 8080
+# Pass the startup script as arguments to Tini
+CMD ["/backend/gcsfuse_run.sh"]
