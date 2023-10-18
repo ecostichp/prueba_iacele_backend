@@ -18,8 +18,9 @@ settings = Settings()
 dbConfig = {
     'drivername': "postgresql+psycopg2",
     'host': settings.gcloud_sql_name,
-    'ip': settings.gcloud_sql_ip,
     'database': settings.gcloud_sql_db,
     'username': settings.gcloud_sql_user,
     'password': settings.gcloud_sql_password
 }
+
+sql_ip_public = settings.gcloud_sql_ip
