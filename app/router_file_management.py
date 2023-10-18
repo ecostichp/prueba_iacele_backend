@@ -1,9 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, Depends
 from fastapi.responses import HTMLResponse
-from fastapi import UploadFile
 
 
-from . import crud_file_management
+from . import crud_file_management, schema, crud_authentication
 
 
 router = APIRouter(
@@ -29,6 +28,6 @@ async def main():
 
 
 @router.post("/uploadfiles/")
-async def create_upload_files(files: list[UploadFile]):
+async def create_upload_files(files: list[UploadFile], current_user: schema.User = Depends(crud_authentication.get_current_user)):
 
      return await crud_file_management.save_files(files)
