@@ -2,7 +2,8 @@ from fastapi import APIRouter, UploadFile, Depends
 from fastapi.responses import HTMLResponse
 
 
-from . import crud_file_management, schema, crud_authentication
+from . import crud_file_management
+from .crud_authentication import user_authenticated
 
 
 router = APIRouter(
@@ -26,7 +27,32 @@ async def main():
     return HTMLResponse(content=content)
 
 
+# @router.post("/uploadfiles/", dependencies=[user_authenticated])
 @router.post("/uploadfiles/")
-async def create_upload_files(files: list[UploadFile], current_user: schema.User = Depends(crud_authentication.get_current_user)):
+async def upload_files(files: list[UploadFile]):
 
-    return await crud_file_management.save_files(files)
+    if files[0].filename == "":
+        return {'message': 'No upload files sent'}
+    else:
+        return await crud_file_management.save_files(files)
+
+
+
+@router.get("/{file_name}/")
+async def get_file(file_name: str):
+
+    return await crud_file_management.get_file(file_name)
+
+
+
+@router.get("/download/{file_name}/")
+async def download_file(file_name: str):
+
+    return await crud_file_management.download_file(file_name)
+
+
+
+@router.delete("/{file_name}/")
+async def delete_file(file_name: str):
+
+    return await crud_file_management.delete_file(file_name)

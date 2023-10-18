@@ -19,7 +19,7 @@ from .config import dbConfig
 # # Conexión remota entre aplicación y database.
 # from urllib.parse import quote_plus
 # password = quote_plus(dbConfig['password'])
-# dbURL = f"postgresql+psycopg2://{dbConfig['username']}:{password}@34.102.109.234/{dbConfig['database']}"
+# dbURL = f"postgresql+psycopg2://{dbConfig['username']}:{password}@{dbConfig['ip']}/{dbConfig['database']}"
 # engine = create_engine(dbURL)
 
 

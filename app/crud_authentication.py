@@ -68,3 +68,6 @@ async def get_current_user(
         )
 
     return schema.User.from_orm(user)
+
+
+user_authenticated = Depends(get_current_user)
