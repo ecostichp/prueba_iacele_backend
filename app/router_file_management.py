@@ -26,8 +26,7 @@ async def main():
     return HTMLResponse(content=content)
 
 
-
 @router.post("/uploadfiles/")
 async def create_upload_files(files: list[UploadFile], current_user: schema.User = Depends(crud_authentication.get_current_user)):
 
-     return await crud_file_management.save_files(files)
+    return await crud_file_management.save_files(files)
