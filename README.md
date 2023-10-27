@@ -107,3 +107,22 @@ En el archivo 'app/database/orm.py' hay 3 configuraciones al 'engine' del ORM pa
     a) Backend de manera local.
     b) Database de manera local (SQLite).
     c) La comunicación entre ellos hace de manera local.
+
+
+
+  ### Para que el devop en google funcione:
+
+Ocupas que el bucket_dir esté dentro del workdir de Docker.
+
+Ocupas, hacer primer la base de datos.
+
+De ahí hacer Cloud Run y meter las variables de entorno al igual que la conexión a la instancia SQL
+
+De ahí, crea el bucket (con el nombre de la variable de ntorno que ya metiste, si no, sólo actualízala)
+
+Ya que tengas el bucket, ve a la parte de IAM (la general, no en el apartado de cuentas de servicio), selecciona la cuenta de servicio de tu instancia de cloud run (para saber cuál es,
+métete a tu instancia de Cloud Run, da click en revisiones, de ahí en seguridad y debajo de identidad y encriptación viene tu cuenta de servicio).
+
+Dale click en editar la cuenta de servicio de tu cloud run (es el ícono del lapiz). Agrega el Rol "Adminsitrador de objetos de Storage" y guarda cambios.
+
+Con esto, Cloud Run ya tiene permisos para escribir de manera local (por unix socket) en tu instancia de SQL y tu instancia de Bucket.
