@@ -1,11 +1,12 @@
 from sqlalchemy import Column, Integer, String
 from passlib.hash import bcrypt
 
-from .orm import Base
+from ..database import Base
 
 
-class User(Base):
-    __tablename__ = 'users'
+class Auth(Base):
+    __tablename__ = 'authentication'
+
     id = Column(Integer, primary_key=True, index=True)
     user = Column(String(16,), nullable=False, unique=True, index=True)
     name = Column(String(64,), nullable=False, index=True)

@@ -1,9 +1,8 @@
 from pydantic import BaseModel, ConfigDict
 
-from datetime import datetime
 
 
-class UserBase(BaseModel):
+class AuthBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     user: str
@@ -12,10 +11,10 @@ class UserBase(BaseModel):
     avatar: str
 
 
-class UserCreate(UserBase):
+class AuthCreate(AuthBase):
     password: str
 
 
-class User(UserBase):
+class Auth(AuthBase):
     id: int
     hashed_password: str

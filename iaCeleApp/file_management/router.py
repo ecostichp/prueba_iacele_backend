@@ -1,9 +1,9 @@
-from fastapi import APIRouter, UploadFile, Depends
+from fastapi import APIRouter, UploadFile
 from fastapi.responses import HTMLResponse
 
 
-from . import crud_file_management
-from .crud_authentication import user_authenticated
+from . import crud
+from ..authentication import user_authenticated
 
 
 router = APIRouter(
@@ -33,25 +33,25 @@ async def upload_files(files: list[UploadFile]):
     if files[0].filename == "":
         return {'message': 'No upload files sent'}
     else:
-        return await crud_file_management.save_files(files)
+        return await crud.save_files(files)
 
 
 
 @router.get("/{file_name}/")
 async def get_file(file_name: str):
 
-    return await crud_file_management.get_file(file_name)
+    return await crud.get_file(file_name)
 
 
 
 @router.get("/download/{file_name}/", dependencies=[user_authenticated])
 async def download_file(file_name: str):
 
-    return await crud_file_management.download_file(file_name)
+    return await crud.download_file(file_name)
 
 
 
 @router.delete("/{file_name}/", dependencies=[user_authenticated])
 async def delete_file(file_name: str):
 
-    return await crud_file_management.delete_file(file_name)
+    return await crud.delete_file(file_name)

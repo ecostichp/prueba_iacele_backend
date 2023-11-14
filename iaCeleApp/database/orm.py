@@ -2,15 +2,18 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-from .config import dbConfig, sql_ip_public
+from ..config import dbConfig, sql_ip_public
+
 
 
 # # ---> Experimental Mode:
 # # Aplicación en modo Local.
 # # Base de datos Local SQLite.
 # # Conexión local entre aplicación y database.
-# DATABASE_URL = "sqlite:///app/database.db"
-# engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# db_file = 'local_iaCele.db'
+# SQLALCHEMY_DATABASE_URL = f"sqlite:///./iaCeleApp/database/{db_file}"
+# engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} )
+
 
 
 # # ---> Development Mode:
