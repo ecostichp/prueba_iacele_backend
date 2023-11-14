@@ -35,7 +35,7 @@ WORKDIR /backend
 ENV GCSFUSE_MOUNT_DIR /backend/uploadfiles
 
 # Copy local code to the container image.
-COPY ./app /backend/app
+COPY ./iaCeleApp /backend/iaCeleApp
 
 
 # Update pip.
