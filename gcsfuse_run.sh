@@ -1,15 +1,46 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -Eeuo pipefail
 
+echo "======================================"
+echo "Inicializando la aplicación FastAPI"
+echo "======================================"
+
+# Variables
 # Asegura la existencia del directorio donde se montará el almacenamiento
-mkdir -p "$GCSFUSE_MOUNT_DIR"
+MOUNT_DIR="${GCSFUSE_MOUNT_DIR:-/backend/uploadfiles}"
 
-echo "Mounting Google Cloud Storage Fuse..."
+# Validar nombre del bucket
+if [[ -z "${BUCKET_NAME:-}" ]]; then
+    echo "ERROR: BUCKET_NAME no está configurado."
+    exit 1
+fi
 
-# Monta el bucket. --implicit-dirs permite que Python y Pandas localicen carpetas generadas externamente
-gcsfuse --implicit-dirs "$BUCKET_NAME" "$GCSFUSE_MOUNT_DIR"
+# Crear directorio de montaje
+mkdir -p "$MOUNT_DIR"
 
-echo "Mounting completed con éxito."
+echo "Bucket: $BUCKET_NAME"
+echo "Mount directory: $MOUNT_DIR"
 
-# Inicia FastAPI reemplazando el proceso del script (exec). Usa 4 trabajadores para producción.
-exec uvicorn iaCeleApp:app --host 0.0.0.0 --port 8080 --workers 4
+# Montar Google Cloud Storage
+echo "Mounting Google Cloud Storage..."
+
+gcsfuse \
+    --implicit-dirs \
+    "$BUCKET_NAME" \
+    "$MOUNT_DIR"
+
+# Verificar montaje
+if ! mountpoint -q "$MOUNT_DIR"; then
+    echo "ERROR: Falló la verificación de montaje de GCSFuse."
+    exit 1
+fi
+
+echo "GCSFuse mounted successfully."
+
+# Iniciar FastAPI
+echo "Iniciando Uvicorn..."
+
+exec uvicorn iaCeleApp:app \
+    --host 0.0.0.0 \
+    --port 8080 \
+    
