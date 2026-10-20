@@ -9,22 +9,17 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /backend
 
-# Instala dependencias del sistema, configura el repositorio de Google Cloud Storage Fuse de forma segura y limpia la caché
+#  Instalación optimizada y segura de dependencias y gcsfuse
 RUN set -e; \
     apt-get update && apt-get install -y --no-install-recommends \
     tini \
-    lsb-release \
     ca-certificates \
     curl \
-    gnupg \
-    && gcsFuseRepo=gcsfuse-$(lsb_release -c -s) \
-    && echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://google.com $gcsFuseRepo main" \
-    | tee /etc/apt/sources.list.d/gcsfuse.list \
-    && curl https://google.com/doc/apt-key.gpg \
-    | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends gcsfuse \
-    && apt-get purge -y --auto-remove lsb-release curl gnupg \
+    fuse3 \
+    && curl -L -O https://github.com \
+    && dpkg --install gcsfuse_2.4.0_amd64.deb \
+    && rm gcsfuse_2.4.0_amd64.deb \
+    && apt-get purge -y --auto-remove curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copia e instala requerimientos ANTES del código para maximizar el uso de la caché de Docker
