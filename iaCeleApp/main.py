@@ -30,7 +30,6 @@ from fastapi.staticfiles import StaticFiles
 app.mount("/static", StaticFiles(directory="iaCeleApp/static"), name="static")
 
 
-
 # Ruta principal
 @app.get("/")
 async def home():

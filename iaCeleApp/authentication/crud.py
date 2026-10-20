@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 from jwt import encode, decode
-from passlib.hash import bcrypt
+from pwdlib import PasswordHash 
 from fastapi.security import OAuth2PasswordBearer
 
 from . import model, schema
@@ -10,6 +10,8 @@ from ..database import get_db
 
 JWT_SECRET = "myjwtsecret"
 
+# Inicializamos el hasher recomendado por FastAPI
+password_hash = PasswordHash.recommended()
 
 oauth2schema = OAuth2PasswordBearer(tokenUrl="/token")
 
@@ -26,12 +28,16 @@ async def get_users_auth(db: Session):
 
 
 async def create_user_auth(schema: schema.AuthCreate, db: Session):
+    # Genera el hash seguro (Argon2) automáticamente
+    # Soporta cualquier longitud de contraseña sin crashes ni truncados
+    secure_hashed_password = password_hash.hash(schema.password)
+
     user_obj = model.Auth(
         user=schema.user,
         name=schema.name,
         position=schema.position,
         avatar=schema.avatar,
-        hashed_password=bcrypt.hash(schema.password)
+        hashed_password=secure_hashed_password
     )
     db.add(user_obj)
     db.commit()

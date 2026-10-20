@@ -25,13 +25,13 @@ def excel_to_pandasDF_usuarios():
     df1 = pd.read_excel(archivo_excel, 'usuarios')
     df1['fecha_nacimiento'] = datetime_parse_pdSerie(df1['fecha_nacimiento'])
     df1['fecha_alta'] = str(datetime.now())
-    df = df1.replace(np.nan, None)
-    
-    bulk_data=[]
-    for index, col in df.iterrows():
-        data = (col)
-        bulk_data.append(data)
 
+    # Reemplazar NaN por None para compatibilidad con SQL
+    df = df1.replace({np.nan: None})
+    
+    # Convertir a matriz de numpy, luego a lista de Python, y finalmente a tuplas
+    # Esto garantiza que NO queden objetos Series de Pandas
+    bulk_data = [tuple(fila) for fila in df.to_numpy().tolist()]
     return bulk_data
 
 
@@ -60,13 +60,11 @@ def excel_to_pandasDF_productos():
     df1 = pd.read_excel(archivo_excel, 'productos')
     df1['Fecha de última compra'] = datetime_parse_pdSerie(df1['Fecha de última compra'])
     df1['Fecha de última venta'] = datetime_parse_pdSerie(df1['Fecha de última venta'])
-    df = df1.replace(np.nan, None)
-
-    bulk_data=[]
-    for index, col in df.iterrows():
-        data = (col)
-        bulk_data.append(data)
-
+    # Reemplazar NaN por None para compatibilidad con SQL
+    df = df1.replace({np.nan: None})
+    
+    # Convertir a matriz de numpy, luego a lista de Python, y finalmente a tuplas
+    bulk_data = [tuple(fila) for fila in df.to_numpy().tolist()]
     return bulk_data
 
 dfProductos = excel_to_pandasDF_productos()
@@ -87,45 +85,51 @@ query_dfProductos = '''
     '''
 
 
-def insert_to_sql(query, dataframe):
-    
-    tabla = query.split(' ', maxsplit=7)[6]
+def insert_to_sql(query, dataframe, motor='sqlite'):
+    '''
+    Inserta datos en la BD. 
+    Parámetro 'motor': 'sqlite' o 'postgres'
+    '''
+    # Limpiamos espacios/saltos de línea y extraemos el nombre de la tabla de forma segura
+    query_limpio = " ".join(query.split())
+    try:
+        # En 'INSERT INTO nombre_tabla ...', la tabla es la tercera palabra (índice 2)
+        tabla = query_limpio.split(' ')[2]
+    except IndexError:
+        tabla = "desconocida"
 
     conn = None
-
+    db_file = './iaCeleApp/database/local_iaCele.db'
     
-    # # Para la conexión local en SQLite
-    # db_file = './iaCeleApp/database/local_iaCele.db'
-    # try:
-    #     # connect to the SQLite Local
-    #     print('\n Iniciando conexión a la base de datos SQLite de manera local...')
-    #     conn = sqlite3.connect(db_file)
-
-    # Para la conexión con PostgreSQL en Google
+    # Adaptar los placeholders según el motor de base de datos elegido
+    if motor == 'sqlite':
+        query = query.replace('%s', '?')
+    
     try:
-        # connect to the PostgreSQL server
-        print('\n Iniciando conexión a la base de datos PostgreSQL en el servidor de Google Cloud...')
-        conn = psycopg2.connect(**dbConfigLocal)
+        if motor == 'sqlite':
+            print('\nIniciando conexión a la base de datos SQLite de manera local...')
+            conn = sqlite3.connect(db_file)
+        elif motor == 'postgres':
+            print('\nIniciando conexión a la base de datos PostgreSQL en el servidor de Google Cloud...')
+            conn = psycopg2.connect(**dbConfigLocal)
+        else:
+            raise ValueError("Motor no válido. Elige 'sqlite' o 'postgres'.")
 
-
-        # create a cursor
         cur = conn.cursor()
-        
-	    # execute a statement
         print('>>> ¡Conexión exitosa!')
-        print(f'\nTratando de insertar los datos en la tabla {tabla}...')
+        print(f'\nTratando de insertar los datos en la tabla "{tabla}"...')
         
         cur.executemany(query, dataframe)
         conn.commit()
-
-	    # close the communication with the PostgreSQL
+        
         cur.close()
         print('Se insertaron con éxito los datos.')
-
+        
     except Exception as error:
-        print('\nHubo un error...')
-        print(error)
-    
+        print('\nHubo un error real en la base de datos...')
+        import traceback
+        # Esto te mostrará la línea exacta y la razón del fallo si la BD rechaza los datos
+        traceback.print_exc() 
     finally:
         if conn is not None:
             conn.close()
@@ -134,5 +138,5 @@ def insert_to_sql(query, dataframe):
 
 
 if __name__ == '__main__':
-    insert_to_sql(query_dfUsuarios, dfUsuarios)
-    insert_to_sql(query_dfProductos, dfProductos)
+    insert_to_sql(query_dfUsuarios, dfUsuarios, 'sqlite')
+    insert_to_sql(query_dfProductos, dfProductos, 'sqlite')

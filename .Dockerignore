@@ -1,10 +1,45 @@
-Dockerfile
-README.md
-*.pyc
-*.pyo
-*.pyd
-__pycache__
-.pytest_cache
+# --- Control de Versiones ---
+.git
+.gitignore
 
-/env-iaCeleApp/
-/dbLocalTests/
+# --- Entornos Virtuales y Dependencias Locales ---
+env-iaCeleApp/
+venv/
+.venv/
+env/
+
+# --- Configuraciones y Secretos (Crítico para Seguridad) ---
+.env
+.env.*
+*.local
+
+# --- Archivos de Base de Datos y Pruebas Locales ---
+dbLocalTests/
+*.db
+*.sqlite
+*.sqlite3
+datos.xlsx
+
+# --- Cuadernos de Jupyter ---
+**/*.ipynb
+
+# --- Archivos Temporales de Editores y Sistema ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Caché de Python y Pruebas ---
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# --- Documentación
+README.md
+LICENSE
+.Dockerignore
+Dockerfile
+requirements_local.txt

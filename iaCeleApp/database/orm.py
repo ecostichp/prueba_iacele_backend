@@ -6,13 +6,13 @@ from ..config import dbConfig, sql_ip_public
 
 
 
-# # ---> Experimental Mode:
-# # Aplicación en modo Local.
-# # Base de datos Local SQLite.
-# # Conexión local entre aplicación y database.
-# db_file = 'local_iaCele.db'
-# SQLALCHEMY_DATABASE_URL = f"sqlite:///./iaCeleApp/database/{db_file}"
-# engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} )
+# ---> Experimental Mode:
+# Aplicación en modo Local.
+# Base de datos Local SQLite.
+# Conexión local entre aplicación y database.
+db_file = 'local_iaCele.db'
+SQLALCHEMY_DATABASE_URL = f"sqlite:///./iaCeleApp/database/{db_file}"
+engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} )
 
 
 
@@ -26,11 +26,11 @@ from ..config import dbConfig, sql_ip_public
 # engine = create_engine(dbURL)
 
 
-# ---> Production Mode:
-# Aplicación en modo remoto en GCloud Run, contenerizada en Docker.
-# Base de datos remota PostgreSQL en GCloudSQL.
-# Conexión local entre aplicación y database (Unix_Socket entre servidores).
-engine = create_engine(URL.create(**dbConfig))
+# # ---> Production Mode:
+# # Aplicación en modo remoto en GCloud Run, contenerizada en Docker.
+# # Base de datos remota PostgreSQL en GCloudSQL.
+# # Conexión local entre aplicación y database (Unix_Socket entre servidores).
+# engine = create_engine(URL.create(**dbConfig))
 
 
 Base = declarative_base()

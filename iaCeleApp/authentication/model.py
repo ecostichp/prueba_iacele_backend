@@ -1,8 +1,11 @@
 from sqlalchemy import Column, Integer, String
-from passlib.hash import bcrypt
+from pwdlib import PasswordHash
 
 from ..database import Base
 
+
+# Inicializamos el mismo verificador
+password_hash = PasswordHash.recommended()
 
 class Auth(Base):
     __tablename__ = 'authentication'
@@ -14,5 +17,6 @@ class Auth(Base):
     avatar = Column(String(16,), nullable=False, index=True)
     hashed_password = Column(String(124,), nullable=False, index=True)
 
-    def verify_password(self, password: str):
-        return bcrypt.verify(password, self.hashed_password)
+    def verify_password(self, password: str) -> bool:
+        # Verifica de forma segura si la contraseña coincide con el hash de la BD
+        return password_hash.verify(password, self.hashed_password)
