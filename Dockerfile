@@ -9,17 +9,19 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /backend
 
-#  Instalación optimizada y segura de dependencias y gcsfuse
+# INSTALACIÓN DE GCSFUSE (Método oficial compatible con Debian Bookworm)
 RUN set -e; \
     apt-get update && apt-get install -y --no-install-recommends \
     tini \
     ca-certificates \
     curl \
-    fuse3 \
-    && curl -L -O https://github.com \
-    && dpkg --install gcsfuse_2.4.0_amd64.deb \
-    && rm gcsfuse_2.4.0_amd64.deb \
-    && apt-get purge -y --auto-remove curl \
+    gnupg \
+    && mkdir -p /etc/apt/keyrings \
+    && curl https://google.com | gpg --dearmor -o /etc/apt/keyrings/cloud.google.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://google.com gcsfuse-bookworm main" | tee /etc/apt/sources.list.d/gcsfuse.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends gcsfuse \
+    && apt-get purge -y --auto-remove curl gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copia e instala requerimientos ANTES del código para maximizar el uso de la caché de Docker
