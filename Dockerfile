@@ -5,7 +5,7 @@ FROM python:3.14-slim-bookworm
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     GCSFUSE_MOUNT_DIR=/backend/uploadfiles \
-    DEBIAN_FRONTEND=noninteractive \
+    DEBIAN_FRONTEND=noninteractive
 
 # Directorio de trabajo
 WORKDIR /backend
