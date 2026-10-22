@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile
+from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import HTMLResponse
 
 
@@ -28,9 +28,9 @@ async def main():
 
 
 @router.post("/uploadfiles/", dependencies=[user_authenticated])
-async def upload_files(files: list[UploadFile]):
+async def upload_files(files: list[UploadFile] = File(...)):
 
-    if files[0].filename == "":
+    if not files or files[0].filename == "":
         return {'message': 'No upload files sent'}
     else:
         return await crud.save_files(files)
