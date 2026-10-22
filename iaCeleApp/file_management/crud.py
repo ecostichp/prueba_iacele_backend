@@ -9,18 +9,16 @@ upload_dir_path.mkdir(parents=True, exist_ok=True)
 
 
 
-async def save_files(files):
+async def save_files(file):
     
-    for file in files:
-        
-        # get the destination path
-        file_path = Path.joinpath(upload_dir_path, file.filename)
+    # get the destination path
+    file_path = Path.joinpath(upload_dir_path, file.filename)
 
-        # copy the file contents
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+    # copy the file contents
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
         
-    return {"filenames": [file.filename for file in files]}
+    return {"filename": file.filename}
 
 
 

@@ -28,12 +28,12 @@ async def main():
 
 
 @router.post("/uploadfiles/", dependencies=[user_authenticated])
-async def upload_files(files: list[UploadFile] = File(...)):
+async def upload_files(file: UploadFile = File(...)):
 
-    if not files or files[0].filename == "":
-        return {'message': 'No upload files sent'}
+    if file.filename == "":
+        return {'message': 'No upload file sent'}
     else:
-        return await crud.save_files(files)
+        return await crud.save_files(file)
 
 
 
