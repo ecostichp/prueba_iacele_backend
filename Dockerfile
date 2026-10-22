@@ -50,7 +50,7 @@ COPY ./gcsfuse_run.sh /backend/gcsfuse_run.sh
 
 # Permisos de ejecución y directorio de montaje
 RUN chmod +x /backend/gcsfuse_run.sh \
-    && mkdir -p /backend/uploadfiles
+    && mkdir -p /backend/bucket
 
 # Gestión de señales y procesos
 ENTRYPOINT ["/usr/bin/tini", "--"]
