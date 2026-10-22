@@ -4,7 +4,7 @@ FROM python:3.14-slim-bookworm
 # Variables de entorno
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    GCSFUSE_MOUNT_DIR=/backend/uploadfiles \
+    GCSFUSE_MOUNT_DIR=/backend/bucket \
     DEBIAN_FRONTEND=noninteractive
 
 # Directorio de trabajo
