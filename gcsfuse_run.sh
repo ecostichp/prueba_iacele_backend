@@ -7,7 +7,7 @@ echo "======================================"
 
 # Variables
 # Asegura la existencia del directorio donde se montará el almacenamiento
-MOUNT_DIR="${GCSFUSE_MOUNT_DIR:-/backend/uploadfiles}"
+MOUNT_DIR="${GCSFUSE_MOUNT_DIR:-/backend/bucket}"
 
 # Validar nombre del bucket
 if [[ -z "${BUCKET_NAME:-}" ]]; then

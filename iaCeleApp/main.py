@@ -23,13 +23,6 @@ app.add_middleware(
 )
 
 
-
-# Se importan las librería necesaria para el manejo de la descarga de archivos estáticos
-from fastapi.staticfiles import StaticFiles
-
-app.mount("/static", StaticFiles(directory="iaCeleApp/static"), name="static")
-
-
 # Ruta principal
 @app.get("/")
 async def home():

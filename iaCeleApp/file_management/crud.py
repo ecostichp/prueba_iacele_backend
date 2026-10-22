@@ -3,7 +3,7 @@ from pathlib import Path
 import shutil
 
 
-upload_dir_name = "uploadfiles"
+upload_dir_name = "bucket"
 upload_dir_path = Path.joinpath(Path.cwd(), upload_dir_name)
 upload_dir_path.mkdir(parents=True, exist_ok=True)
 
