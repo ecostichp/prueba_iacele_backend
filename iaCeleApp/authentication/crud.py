@@ -13,7 +13,7 @@ JWT_SECRET = "myjwtsecret"
 # Inicializamos el hasher recomendado por FastAPI
 password_hash = PasswordHash.recommended()
 
-oauth2schema = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2schema = OAuth2PasswordBearer(tokenUrl="authentication/token")
 
 
 
