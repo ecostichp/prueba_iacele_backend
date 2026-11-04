@@ -87,6 +87,7 @@ async def patch_obj(id: int, obj_auth_vals: schema.EmployeesAuthentication, sess
         auth_vals_data = obj_auth_vals.model_dump()
         auth_vals_data['empleado_id'] = id
         del auth_vals_data['is_app_user']
+        pritn(auth_vals_data)
         auth_vals = authschema.AuthenticationsCreate.model_validate(auth_vals_data)
         await authcrud.create(auth_vals, session)
 

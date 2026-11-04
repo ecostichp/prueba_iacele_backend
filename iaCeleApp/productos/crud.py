@@ -7,9 +7,8 @@ from . import schema
 async def read_all_limit(session: Session, offset: int, limit: int|None):
 
     statement = select(schema.Products).offset(offset).limit(limit)
-    all = session.exec(statement).all()
 
-    return all
+    return session.exec(statement).all()
 
 
 async def read_by_key(key: int, session: Session):

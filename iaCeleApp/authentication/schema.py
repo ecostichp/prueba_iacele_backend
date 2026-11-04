@@ -16,20 +16,19 @@ class TipoUsuario(str, Enum):
 
 class AuthenticationsBase(SQLModel):
     username: str = Field(unique=True, index=True)
+    counting_user_id: int|None
+    assigned_user_id: int|None
+    tipo: TipoUsuario
 
 
 class AuthenticationsCreate(AuthenticationsBase):
-    tipo: TipoUsuario
-    empleado_id: int|None
-    avatar: str|None = None
-
+    pass
 
 class Authentications(AuthenticationsBase, table=True):
     id: int|None = Field(default=None, primary_key=True)
     avatar: str|None = None
     password_hashed: str
     fecha_alta: NaiveDatetime = Field(default_factory=datetime.now)
-    tipo: TipoUsuario
     
     empleado_id: int|None = Field(foreign_key="employees.id", unique=True)
     empleado: Optional["Employees"] = Relationship(
@@ -50,6 +49,13 @@ class AuthenticationsUpdate(SQLModel):
     avatar: str|None = None
     password_str: str|None = None
 
+class AuthenticationsPublic(SQLModel):
+    username: str
+    avatar: str|None
+    empleado_id: int|None
+    counting_user_id: int|None
+    assigned_user_id: int|None
+    tipo: str 
 
 class Token(SQLModel):
     access_token: str

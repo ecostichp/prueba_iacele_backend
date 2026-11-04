@@ -63,3 +63,5 @@ class EmployeesAuthentication(SQLModel):
     username: str
     avatar: str | None = None
     tipo: str = 'empleado'
+    counting_user_id: int|None
+    assigned_user_id: int|None

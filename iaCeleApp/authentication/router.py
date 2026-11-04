@@ -16,7 +16,7 @@ router = APIRouter(
 
 #Quitar este endpoint cuando se tenga trabajado el tema de autenticación y promoción de usuarios (empleados)
 from sqlmodel  import select
-@router.get('/', response_model=list[schema.Authentications])
+@router.get('/', response_model=list[schema.AuthenticationsPublic])
 async def wep_all(session: SessionDep):
 
     return session.exec(select(schema.Authentications)).all()
@@ -47,7 +47,7 @@ async def generate_token(session: SessionDep, form_data: OAuth2PasswordRequestFo
     return await crud.create_token(user_authenticated)
 
 
-@router.get("/user/me", response_model=schema.Authentications)
+@router.get("/user/me", response_model=schema.AuthenticationsPublic)
 async def read_authenticated_me(current_user:  Annotated[schema.Authentications, Depends(crud.require_user_authenticated)]):
 
     return current_user
