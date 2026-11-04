@@ -1,8 +1,20 @@
 from fastapi import FastAPI
 
+# Se agrega el ORM ya que integramos las subapps para que se creen todas las tablas en la base de datos.
+from contextlib import asynccontextmanager
+from .database import create_db_and_tables
 
-# Se instancía la clase para generar el objeto 'app'. Este es el módulo principal.
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Se ejecuta al iniciar el servidor (Reemplaza a @app.on_event("startup"))
+    create_db_and_tables()
+    
+    yield # Aquí la API se queda escuchando peticiones
+    
+    # Aquí puedes poner código si necesitaras limpiar algo al apagar (Shutdown)
+
+# 2. Inicializar FastAPI pasándole el lifespan
+app = FastAPI(lifespan=lifespan)
 
 
 
@@ -36,17 +48,17 @@ async def home():
 from .authentication import router as authentication
 app.include_router(authentication.router)
 
-from .usuarios import router as usuarios
-app.include_router(usuarios.router)
+from .empleados import router as empleados
+app.include_router(empleados.router)
+
+from .equipos import router as equipos
+app.include_router(equipos.router)
 
 from .productos import router as productos
 app.include_router(productos.router)
 
+from .inventario import router as inventario
+app.include_router(inventario.router)
+
 from .file_management import router as file_management
 app.include_router(file_management.router)
-
-
-
-# Se agrega el ORM ya que integramos las subapps para que se creen todas las tablas en la base de datos.
-from .database import Base, engine
-Base.metadata.create_all(bind=engine)

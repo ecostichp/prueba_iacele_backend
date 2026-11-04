@@ -1,2 +1,2 @@
 from . import router
-from .crud import user_authenticated
+from .crud import authentication_require

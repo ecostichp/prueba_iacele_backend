@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     gcloud_sql_user: str
     gcloud_sql_password: str
     bucket_name: str
+    odoo_clave_api: str
+    odoo_db_api: str
+    odoo_db_prueba_api: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
@@ -18,9 +21,8 @@ settings = Settings()
 dbConfig = {
     'drivername': "postgresql+psycopg2",
     'host': settings.gcloud_sql_name,
+    'sql_ip_public': settings.gcloud_sql_ip,
     'database': settings.gcloud_sql_db,
     'username': settings.gcloud_sql_user,
     'password': settings.gcloud_sql_password
 }
-
-sql_ip_public = settings.gcloud_sql_ip

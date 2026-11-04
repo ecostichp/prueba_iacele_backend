@@ -1,80 +1,77 @@
 # Se importan las librerías necesarias
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List
+from fastapi import APIRouter, HTTPException, Query
+from typing import Annotated
 
-
-from . import crud, schema
-
-from ..database import get_db
+from . import schema, crud
+from ..database import SessionDep
+from ..authentication import authentication_require
 
 
 # Se instancía la clase para generar el objeto 'router'
 router = APIRouter(
-    prefix="/productos",
-    tags=["productos"],
+    prefix="/products",
+    tags=["products"],
     responses={404: {"description": "Not found"}},
+    # dependencies=[authentication_require]
 )
 
 
+@router.post("/new", response_model=schema.Products)
+async def post_obj(new_obj: schema.ProductsCreate, session: SessionDep):
 
-# Se contruyen todas las rutas y debajo de ellas el end-point
-@router.get("/", response_model=List[schema.Productos])
-async def get_all_productos(db: Session = Depends(get_db)):
+    existing_obj = await crud.read_by_key(new_obj.id_odoo, session)
 
-    return await crud.get_all_products(db)
-
-
-@router.get('/codigo/{product_code}', response_model=schema.Productos)
-async def get_product_by_code(product_code: int, db: Session = Depends(get_db)):
-
-    existing_product = await crud.get_product_by_codigo(db, product_code)
-
-    if not existing_product:
-        raise HTTPException(status_code=400, detail='El producto no existe')
-
-    return existing_product
-
-
-@router.get('/id/{product_id}', response_model=schema.Productos)
-async def get_product_by_id(product_id: int, db: Session = Depends(get_db)):
-
-    existing_product = await crud.get_product_by_id(db, product_id)
-
-    if not existing_product:
-        raise HTTPException(status_code=400, detail='El id no existe')
-
-    return existing_product
-
-
-@router.post("/new", response_model=schema.Productos)
-async def create_product(schema: schema.ProductosCreate, db: Session = Depends(get_db)):
-
-    existing_product = await crud.get_product_by_codigo(db, schema.codigo)
-
-    if existing_product:
+    if existing_obj:
         raise HTTPException(status_code=400, detail='El producto ya existe')
 
-    return await crud.create_product(db, schema)
+    return await crud.create(new_obj, session)
 
 
-@router.delete("/codigo/{product_code}", response_model=str)
-async def delete_product(product_code: int, db: Session = Depends(get_db)):
+@router.get("/", response_model=list[schema.Products])
+async def get_obj_all(session: SessionDep, offset: int = 0, limit:Annotated[int|None, Query(le=100)] = None):
 
-    existing_product = await crud.get_product_by_codigo(db, product_code)
-
-    if not existing_product:
-        raise HTTPException(status_code=400, detail='El producto no existe')
-
-    return await crud.delete_product(db, existing_product)
+    return await crud.read_all_limit(session, offset, limit)
 
 
-@router.patch("/codigo/{product_code}/{values}", response_model=str)
-async def update_product(product_code: int, values: str, db: Session = Depends(get_db)):
+@router.get('/key/{key}', response_model=schema.Products)
+async def get_obj_by_key(key: int, session: SessionDep):
 
-    existing_product = await crud.get_product_by_codigo(db, product_code)
+    existing_obj = await crud.read_by_key(key, session)
 
-    if not existing_product:
-        raise HTTPException(status_code=400, detail='El producto no existe')
+    if not existing_obj:
+        raise HTTPException(status_code=400, detail='El id_odoo del producto no existe')
 
-    return await crud.update_product(db, values, existing_product)
+    return existing_obj
+
+
+@router.get('/id/{id}', response_model=schema.Products)
+async def get_obj_by_id(id: int, session: SessionDep):
+
+    existing_obj = await crud.read_by_id(id, session)
+
+    if not existing_obj:
+        raise HTTPException(status_code=400, detail='El id del producto no existe')
+
+    return existing_obj
+
+
+@router.patch("/id/{id}/{values}", response_model=schema.Products)
+async def patch_obj(id: int, obj_new_vals: schema.ProductsUpdate, session: SessionDep):
+
+    existing_obj = await crud.read_by_id(id, session)
+
+    if not existing_obj:
+        raise HTTPException(status_code=400, detail='El id del producto no existe')
+
+    return await crud.update(existing_obj, obj_new_vals, session)
+
+
+@router.delete("/id/{id}", response_model=str)
+async def delete_obj(id: int, session: SessionDep):
+
+    existing_obj = await crud.read_by_id(id, session)
+
+    if not existing_obj:
+        raise HTTPException(status_code=400, detail='El id del producto no existe')
+
+    return await crud.delete(existing_obj, session)

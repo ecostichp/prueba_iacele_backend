@@ -1,27 +1,26 @@
-from pydantic import BaseModel, ConfigDict
-from datetime import datetime
+from sqlmodel import SQLModel, Field
+from datetime import datetime, timezone
 
 
-class ProductosBase(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    codigo: int
-    descripcion: str
-    linea: str
-    existencia: float = 0
-    ultimo_costo: float = 0
-    cantidad_ventas_anuales: float = 0
-    monto_ventas_anuales: float = 0
+class ProductsBase(SQLModel):
+    id_odoo: int = Field(unique=True, index=True)
+    code: str = Field(unique=True)
+    name: str = Field(unique=True, index=True, default='Nuevo producto')
+    cost: float = 0
+    price: float = 0
 
 
-
-class ProductosCreate(ProductosBase):
-    fecha_ultima_compra_str: str
-    fecha_ultima_venta_str: str
+class ProductsCreate(ProductsBase):
+    pass
 
 
-class Productos(ProductosBase):
-    id: int
-    estatus: bool = True
-    fecha_ultima_compra: datetime | None
-    fecha_ultima_venta: datetime | None
+class Products(ProductsBase, table=True):
+
+    id: int|None = Field(default=None, primary_key=True)
+    fecha_alta: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ProductsUpdate(SQLModel):
+    name: str | None = None
+    cost: float | None = None
+    price: float | None = None

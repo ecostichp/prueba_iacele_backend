@@ -3,18 +3,19 @@ from fastapi.responses import HTMLResponse
 
 
 from . import crud
-from ..authentication import user_authenticated
+from ..authentication import authentication_require
 
 
 router = APIRouter(
     tags=["file_management"],
     prefix='/file_management',
     responses={404: {"description": "Not found"}},
+    dependencies=[authentication_require],
 )
 
 
 
-@router.get("/", dependencies=[user_authenticated])
+@router.get("/")
 async def main():
     content = """
 <body>
@@ -27,7 +28,7 @@ async def main():
     return HTMLResponse(content=content)
 
 
-@router.post("/uploadfiles/", dependencies=[user_authenticated])
+@router.post("/uploadfiles/")
 async def upload_files(file: UploadFile = File(...)):
 
     if file.filename == "":
@@ -44,14 +45,14 @@ async def get_file(file_name: str):
 
 
 
-@router.get("/download/{file_name}/", dependencies=[user_authenticated])
+@router.get("/download/{file_name}/")
 async def download_file(file_name: str):
 
     return await crud.download_file(file_name)
 
 
 
-@router.delete("/{file_name}/", dependencies=[user_authenticated])
+@router.delete("/{file_name}/")
 async def delete_file(file_name: str):
 
     return await crud.delete_file(file_name)

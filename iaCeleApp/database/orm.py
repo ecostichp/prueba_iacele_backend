@@ -1,9 +1,9 @@
-from sqlalchemy import create_engine
+from typing import Annotated
+from fastapi import Depends
+from sqlmodel import create_engine, Session, SQLModel
 from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import sessionmaker, declarative_base
 
-from ..config import dbConfig, sql_ip_public
-
+from .config import dbConfig
 
 
 # ---> Experimental Mode:
@@ -22,7 +22,7 @@ engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_threa
 # # Conexión remota entre aplicación y database.
 # from urllib.parse import quote_plus
 # password = quote_plus(dbConfig['password'])
-# dbURL = f"postgresql+psycopg2://{dbConfig['username']}:{password}@{sql_ip_public}/{dbConfig['database']}"
+# dbURL = f"postgresql+psycopg2://{dbConfig['username']}:{password}@{dbConfig['sql_ip_public']}/{dbConfig['database']}"
 # engine = create_engine(dbURL)
 
 
@@ -33,15 +33,11 @@ engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_threa
 # engine = create_engine(URL.create(**dbConfig))
 
 
-Base = declarative_base()
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
 
+def get_session():
+    with Session(engine) as session:
+        yield session
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+SessionDep = Annotated[Session, Depends(get_session)]

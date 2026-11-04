@@ -1,6 +1,17 @@
 import psycopg2
 
-from dbConnect import dbConfigLocal
+gcloud_sql_host = "34.94.9.168"
+gcloud_sql_db = 'iaceledb'
+gcloud_sql_user = "licCostich"
+gcloud_sql_password = "Lic@123456"
+
+
+dbConfigLocal = {
+    'host': gcloud_sql_host,
+    'database': gcloud_sql_db,
+    'user': gcloud_sql_user,
+    'password': gcloud_sql_password
+}
 
 
 def connect_to_PostgreSQL():
