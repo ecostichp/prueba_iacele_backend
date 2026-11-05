@@ -19,6 +19,7 @@ class AuthenticationsBase(SQLModel):
     counting_user_id: int|None
     assigned_user_id: int|None
     tipo: TipoUsuario
+    empleado_id: int|None = Field(foreign_key="employees.id", unique=True)
 
 
 class AuthenticationsCreate(AuthenticationsBase):
@@ -30,7 +31,6 @@ class Authentications(AuthenticationsBase, table=True):
     password_hashed: str
     fecha_alta: NaiveDatetime = Field(default_factory=datetime.now)
     
-    empleado_id: int|None = Field(foreign_key="employees.id", unique=True)
     empleado: Optional["Employees"] = Relationship(
         back_populates="app_user",
         sa_relationship_kwargs={
