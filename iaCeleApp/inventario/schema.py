@@ -1,8 +1,7 @@
 from typing import Optional
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, func
 from sqlmodel.main import NaiveDatetime
-from datetime import datetime
 
 
 class TipoConteo(str, Enum):
@@ -27,7 +26,7 @@ class InventoryCreate(InventoryBase):
 
 class Inventory(InventoryBase, table=True):
     id: int|None = Field(default=None, primary_key=True)
-    date_create: NaiveDatetime  = Field(default_factory=datetime.now)
+    date_create: NaiveDatetime|None = Field(default=None, sa_column_kwargs={"server_default": func.now()})
     assigned_user_team: Optional["Teams"] | None = Relationship(
         sa_relationship_kwargs={
         "uselist": False,
@@ -54,8 +53,17 @@ class Inventory_InvididualRegisters(SQLModel):
     name: str
     total_qty: float
 
+
+class Inventory_InvididualProductAllRegisters(SQLModel):
+    product_id: dict
+    registers: list[dict]
+
+
 class Inventory_TeamRegisters(SQLModel):
     id_products: int
     code: str
     name: str
-    total_qty: float
+    total_qty_a: float | None
+    total_qty_b: float | None
+    iguales: bool
+    

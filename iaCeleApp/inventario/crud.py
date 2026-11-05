@@ -43,6 +43,39 @@ async def delete(existing_obj:schema.Inventory, session: Session):
     return 'Producto borrado con éxito'
 
 
+async def read_invidual_code_registers_all(employee_id: int, id_product: int, session: Session):
+
+    statement = (
+            select(
+                schema.Inventory,
+                schema_productos.Products.id,
+                schema_productos.Products.code,
+                schema_productos.Products.name,
+            )
+            .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
+            .where(schema.Inventory.assigned_user_id == employee_id)
+            .where(schema.Inventory.count_type == 'individual')
+            .where(schema.Inventory.id_products == id_product)
+        )
+
+    all_registers = session.exec(statement).all()
+    
+    return [
+        {
+            "product_id": {
+                "id": all_registers[0]._mapping["id"],
+                "code": all_registers[0]._mapping["code"],
+                "name": all_registers[0]._mapping["name"],
+                "total_qty": sum(
+                    reg._mapping["Inventory"].count_qty for reg in all_registers 
+                    if reg._mapping["Inventory"].count_qty is not None
+                ),
+            },
+            "registers": [dict(row._mapping['Inventory']) for row in all_registers]
+        }
+    ]
+
+
 async def read_invidual_registers_limit(employee_id: int, session: Session, offset: int, limit: int|None):
 
     statement = (
@@ -65,7 +98,7 @@ async def read_invidual_registers_limit(employee_id: int, session: Session, offs
         )
 
     all_registers = session.exec(statement).all()
-    
+
     return [dict(row._mapping) for row in all_registers]
 
 

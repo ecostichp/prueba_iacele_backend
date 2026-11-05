@@ -1,7 +1,6 @@
 from typing import Optional
-from datetime import datetime, timezone
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, func
 from sqlmodel.main import NaiveDatetime
 
 from .crud import password_hash
@@ -29,7 +28,7 @@ class Authentications(AuthenticationsBase, table=True):
     id: int|None = Field(default=None, primary_key=True)
     avatar: str|None = None
     password_hashed: str
-    fecha_alta: NaiveDatetime = Field(default_factory=datetime.now)
+    fecha_alta: NaiveDatetime|None = Field(default=None, sa_column_kwargs={"server_default": func.now()})
     
     empleado: Optional["Employees"] = Relationship(
         back_populates="app_user",

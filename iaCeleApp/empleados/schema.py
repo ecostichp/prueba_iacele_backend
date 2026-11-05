@@ -1,6 +1,5 @@
 from typing import Optional
-from datetime import datetime, timezone
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, func
 from sqlmodel.main import NaiveDatetime
 
 
@@ -21,7 +20,7 @@ class Employees(EmployeesBase, table=True):
     id: int|None = Field(default=None, primary_key=True)
     hire_date: NaiveDatetime
     active: bool = True
-    create_date: NaiveDatetime = Field(default_factory=datetime.now)
+    create_date: NaiveDatetime|None = Field(default=None, sa_column_kwargs={"server_default": func.now()})
     is_app_user: bool = False
     app_user: Optional["Authentications"] = Relationship(
         back_populates="empleado",
