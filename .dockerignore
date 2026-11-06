@@ -14,11 +14,11 @@ env/
 *.local
 
 # --- Archivos de Base de Datos y Pruebas Locales ---
+# SQLite local vive en dbLocalTests/dbLocal y no entra a la imagen.
 dbLocalTests/
 *.db
 *.sqlite
 *.sqlite3
-!iaCeleApp/database/local_iaCele.db
 
 # --- Cuadernos de Jupyter ---
 **/*.ipynb
