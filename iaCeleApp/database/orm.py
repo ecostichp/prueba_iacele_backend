@@ -30,13 +30,7 @@ engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_threa
 # # Aplicación en modo remoto en GCloud Run, contenerizada en Docker.
 # # Base de datos remota PostgreSQL en GCloudSQL.
 # # Conexión local entre aplicación y database (Unix_Socket entre servidores).
-# engine = create_engine(URL.create(
-#     drivername=dbConfig["drivername"],
-#     username=dbConfig["username"],
-#     password=dbConfig["password"],
-#     database=dbConfig["database"],
-#     query={"host": dbConfig["host"]},
-# ))
+# engine = create_engine(URL.create(**dbConfig))
 
 
 def create_db_and_tables():
