@@ -7,11 +7,14 @@ from sqlalchemy.engine.url import URL
 from .config import settings
 
 
-def cloudsql_socket_dir() -> str:
-    socket_dir = settings.gcloud_sql_name.strip()
-    if not socket_dir.startswith("/"):
-        socket_dir = f"/cloudsql/{socket_dir}"
-    return socket_dir
+def cloudsql_instance_name() -> str:
+    name = settings.gcloud_sql_name.strip().strip('"').strip("'")
+    if name.startswith("/cloudsql/"):
+        name = name[len("/cloudsql/"):]
+    suffix = "/.s.PGSQL.5432"
+    if name.endswith(suffix):
+        name = name[: -len(suffix)]
+    return name
 
 
 def build_engine():
@@ -45,22 +48,24 @@ def build_engine():
         )
 
     if mode == "cloudsql":
-        socket_dir = cloudsql_socket_dir()
-        print(f"DB_MODE=cloudsql ({socket_dir}/{settings.gcloud_sql_db})")
-        return create_engine(
-            URL.create(
-                drivername="postgresql+psycopg2",
-                username=settings.gcloud_sql_user,
+        from google.cloud.sql.connector import Connector
+
+        instance = cloudsql_instance_name()
+        connector = Connector(ip_type="public", refresh_strategy="lazy")
+
+        def getconn():
+            return connector.connect(
+                instance,
+                "psycopg",
+                user=settings.gcloud_sql_user,
                 password=settings.gcloud_sql_password,
-                database=settings.gcloud_sql_db,
-                query={
-                    "host": socket_dir,
-                    # libpq 18 negocia el cifrado en directo y el proxy de Cloud Run cierra el socket.
-                    "gssencmode": "disable",
-                    "sslmode": "prefer",
-                    "sslnegotiation": "postgres",
-                },
-            ),
+                db=settings.gcloud_sql_db,
+            )
+
+        print(f"DB_MODE=cloudsql ({instance}/{settings.gcloud_sql_db})")
+        return create_engine(
+            "postgresql+psycopg://",
+            creator=getconn,
             pool_pre_ping=True,
         )
 
