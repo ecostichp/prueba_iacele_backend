@@ -2,6 +2,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    # sqlite: archivo local. postgres: IP pública desde tu máquina.
+    # cloudsql: socket Unix. El contenedor fija este valor.
+    db_mode: str = "sqlite"
     gcloud_sql_name: str
     gcloud_sql_ip: str
     gcloud_sql_db: str
@@ -16,13 +19,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-
-dbConfig = {
-    'drivername': "postgresql+psycopg2",
-    'host': settings.gcloud_sql_name,
-    'sql_ip_public': settings.gcloud_sql_ip,
-    'database': settings.gcloud_sql_db,
-    'username': settings.gcloud_sql_user,
-    'password': settings.gcloud_sql_password
-}

@@ -5,7 +5,8 @@ FROM python:3.14-slim-bookworm
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     GCSFUSE_MOUNT_DIR=/backend/bucket \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    DB_MODE=cloudsql
 
 # Directorio de trabajo
 WORKDIR /backend
