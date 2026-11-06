@@ -1,3 +1,4 @@
+from sqlalchemy import delete as delete_rows
 from sqlmodel  import Session, select, func, case, alias
 
 from ..timeutil import as_utc
@@ -50,6 +51,13 @@ async def delete(existing_obj:schema.Inventory, session: Session):
     session.commit()
 
     return 'Producto borrado con éxito'
+
+
+async def delete_all(session: Session):
+    result = session.exec(delete_rows(schema.Inventory))
+    deleted = int(result.rowcount or 0)
+    session.commit()
+    return deleted
 
 
 async def read_invidual_code_registers_all(employee_id: int, id_product: int, session: Session):

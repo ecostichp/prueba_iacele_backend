@@ -1,3 +1,4 @@
+import os
 from typing import Annotated
 from fastapi import Depends
 from sqlmodel import create_engine, Session, SQLModel
@@ -6,31 +7,28 @@ from sqlalchemy.engine.url import URL
 from .config import dbConfig
 
 
-# ---> Experimental Mode:
-# Aplicación en modo Local.
-# Base de datos Local SQLite.
-# Conexión local entre aplicación y database.
-db_file = 'local_iaCele.db'
-SQLALCHEMY_DATABASE_URL = f"sqlite:///./iaCeleApp/database/{db_file}"
-engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} )
+def build_engine():
+    # Cloud Run define K_SERVICE. Ahí la base es PostgreSQL por el socket de Cloud SQL.
+    # En esta computadora se queda el archivo SQLite.
+    if os.getenv("K_SERVICE"):
+        return create_engine(
+            URL.create(
+                drivername="postgresql+psycopg2",
+                username=dbConfig["username"],
+                password=dbConfig["password"],
+                database=dbConfig["database"],
+                query={"host": dbConfig["host"]},
+            )
+        )
+
+    db_file = "local_iaCele.db"
+    return create_engine(
+        f"sqlite:///./iaCeleApp/database/{db_file}",
+        connect_args={"check_same_thread": False, "timeout": 30},
+    )
 
 
-
-# # ---> Development Mode:
-# # Aplicación en modo Local.
-# # Base de datos remota PostgreSQL en GCloudSQL.
-# # Conexión remota entre aplicación y database.
-# from urllib.parse import quote_plus
-# password = quote_plus(dbConfig['password'])
-# dbURL = f"postgresql+psycopg2://{dbConfig['username']}:{password}@{dbConfig['sql_ip_public']}/{dbConfig['database']}"
-# engine = create_engine(dbURL)
-
-
-# # ---> Production Mode:
-# # Aplicación en modo remoto en GCloud Run, contenerizada en Docker.
-# # Base de datos remota PostgreSQL en GCloudSQL.
-# # Conexión local entre aplicación y database (Unix_Socket entre servidores).
-# engine = create_engine(URL.create(**dbConfig))
+engine = build_engine()
 
 
 def create_db_and_tables():

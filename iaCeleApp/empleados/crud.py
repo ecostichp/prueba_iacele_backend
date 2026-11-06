@@ -1,6 +1,7 @@
 from sqlmodel  import Session, select
 from datetime import datetime
 
+from ..timeutil import as_utc
 from . import schema
 
 
@@ -30,7 +31,7 @@ async def create(new_obj: schema.EmployeesCreate, session: Session):
             'hire_date_str'
         }
     )
-    obj_data['hire_date'] = datetime.strptime(new_obj.hire_date_str, r"%Y-%m-%d")
+    obj_data['hire_date'] = as_utc(datetime.strptime(new_obj.hire_date_str, r"%Y-%m-%d"))
 
     db_obj = schema.Employees(**obj_data)
 
@@ -45,7 +46,7 @@ async def update(existing_obj:schema.Employees, obj_new_vals: schema.EmployeesUp
     
     obj_new_data = obj_new_vals.model_dump(exclude_unset=True)
     if 'hire_date' in obj_new_data.keys():
-        obj_new_data['hire_date'] = datetime.strptime(obj_new_vals.hire_date_str, r"%Y-%m-%d")
+        obj_new_data['hire_date'] = as_utc(datetime.strptime(obj_new_vals.hire_date_str, r"%Y-%m-%d"))
 
     db_obj = existing_obj.sqlmodel_update(obj_new_data)
 

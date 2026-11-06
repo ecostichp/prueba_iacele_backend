@@ -156,3 +156,6 @@ cython_debug/
 
 # Carperta de VsCode
 .vscode/
+
+# Copia local de los conteos, para restaurar
+iaCeleApp/database/inventory_backup.json

@@ -1,10 +1,12 @@
 # Se importan las librerías necesarias
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Annotated
 
 from . import schema, crud
 from ..database import SessionDep
 from ..authentication import authentication_require
+from ..authentication.crud import require_user_authenticated
+from ..authentication.schema import Authentications
 from ..empleados import crud as crud_empleados
 from ..equipos import crud as crud_equipos
 from ..productos import crud as crud_productos
@@ -68,6 +70,22 @@ async def get_obj_by__team(id_team: int, session: SessionDep, offset: int = 0, l
         raise HTTPException(status_code=400, detail='El id del equipo no existe')
     
     return await crud.read_team_registers_limit(existing_obj, session, offset, limit)
+
+
+@router.delete("/registers")
+async def delete_all_registers(
+    session: SessionDep,
+    current_user: Annotated[Authentications, Depends(require_user_authenticated)],
+):
+    employee = None
+    if current_user.empleado_id:
+        employee = await crud_empleados.read_by_id(current_user.empleado_id, session)
+    title = (employee.job_title if employee else "").strip().casefold()
+    if title != "director general":
+        raise HTTPException(status_code=403, detail="No puedes borrar el inventario")
+
+    deleted = await crud.delete_all(session)
+    return {"deleted": deleted}
 
 
 @router.delete("/id/{id}", response_model=str)
