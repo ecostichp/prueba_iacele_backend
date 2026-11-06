@@ -18,7 +18,6 @@ dbLocalTests/
 *.db
 *.sqlite
 *.sqlite3
-!iaCeleApp/database/local_iaCele.db
 
 # --- Cuadernos de Jupyter ---
 **/*.ipynb
