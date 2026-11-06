@@ -23,7 +23,7 @@ class AuthenticationsBase(SQLModel):
 
 
 class AuthenticationsCreate(AuthenticationsBase):
-    pass
+    avatar: str | None = None
 
 class Authentications(AuthenticationsBase, table=True):
     id: int|None = Field(default=None, primary_key=True)

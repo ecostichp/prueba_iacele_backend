@@ -87,16 +87,48 @@ async def delete(existing_obj:schema.Authentications, session: Session):
 
 
 
-async def change_in_authentication(obj, session: Session):
+async def change_in_authentication(employee_id: int, payload, session: Session):
+    from ..empleados.crud import read_by_id as read_employee_by_id
 
-    user = await read_by_employee_id(obj['id'], session)
-    
-    if not user and obj['is_app_user'] == True:
-        return await create(obj, session)
-    elif user and obj['is_app_user'] == False:
-        return await delete(user, session)
+    employee = await read_employee_by_id(employee_id, session)
+    if not employee:
+        raise HTTPException(status_code=400, detail='El id del empleado no existe')
 
-    return 'Usuario de aplicación borrado con éxito'
+    account = await read_by_employee_id(employee_id, session)
+
+    if payload.is_app_user:
+        if account:
+            raise HTTPException(status_code=400, detail='El id del empleado ya tiene usuario')
+        username = (payload.username or "").strip()
+        if not username:
+            raise HTTPException(status_code=400, detail='Falta el username')
+        if await read_by_username(username, session):
+            raise HTTPException(status_code=400, detail='Ya existe un usuario con ese username')
+
+        await create(
+            schema.AuthenticationsCreate(
+                username=username,
+                avatar=f"{username}.png",
+                counting_user_id=employee_id,
+                assigned_user_id=employee_id,
+                tipo=schema.TipoUsuario.empleado,
+                empleado_id=employee_id,
+            ),
+            session,
+        )
+        employee.is_app_user = True
+        session.add(employee)
+        session.commit()
+        session.refresh(employee)
+        return employee
+
+    if account:
+        session.delete(account)
+    employee.is_app_user = False
+    session.add(employee)
+    session.commit()
+    session.refresh(employee)
+    return employee
 
 
 

@@ -61,8 +61,4 @@ class EmployeesUpdate(SQLModel):
 
 class EmployeesAuthentication(SQLModel):
     is_app_user: bool
-    username: str
-    avatar: str | None = None
-    tipo: str = 'empleado'
-    counting_user_id: int|None
-    assigned_user_id: int|None
+    username: str | None = None
