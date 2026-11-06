@@ -51,7 +51,7 @@ def build_engine():
         from google.cloud.sql.connector import Connector
 
         instance = cloudsql_instance_name()
-        connector = Connector(ip_type="public", refresh_strategy="lazy")
+        connector = Connector(ip_type="public", refresh_strategy="background")
 
         def getconn():
             return connector.connect(
@@ -67,6 +67,10 @@ def build_engine():
             "postgresql+psycopg://",
             creator=getconn,
             pool_pre_ping=True,
+            pool_size=8,
+            max_overflow=8,
+            pool_timeout=20,
+            pool_recycle=1800,
         )
 
     raise RuntimeError(

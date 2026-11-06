@@ -6,26 +6,26 @@ from ..timeutil import as_utc
 from . import schema
 
 
-async def read_all_limit(session: Session, offset: int, limit: int|None):
+def read_all_limit(session: Session, offset: int, limit: int|None):
 
     statement = select(schema.Employees).offset(offset).limit(limit)
 
     return session.exec(statement).all()
 
 
-async def read_by_key(key: id, session: Session):
+def read_by_key(key: id, session: Session):
 
     statement = select(schema.Employees).where(schema.Employees.id_odoo == key)
 
     return session.exec(statement).first()
 
 
-async def read_by_id(id: int, session: Session):
+def read_by_id(id: int, session: Session):
 
     return session.get(schema.Employees, id)
 
 
-async def create(new_obj: schema.EmployeesCreate, session: Session):
+def create(new_obj: schema.EmployeesCreate, session: Session):
     
     obj_data = new_obj.model_dump(
         exclude = {
@@ -51,7 +51,7 @@ async def create(new_obj: schema.EmployeesCreate, session: Session):
     return db_obj
 
 
-async def update(existing_obj:schema.Employees, obj_new_vals: schema.EmployeesUpdate, session: Session):
+def update(existing_obj:schema.Employees, obj_new_vals: schema.EmployeesUpdate, session: Session):
     
     obj_new_data = obj_new_vals.model_dump(exclude_unset=True)
     if 'hire_date' in obj_new_data.keys():
@@ -66,7 +66,7 @@ async def update(existing_obj:schema.Employees, obj_new_vals: schema.EmployeesUp
     return db_obj
 
 
-async def delete(existing_obj:schema.Employees, session: Session):
+def delete(existing_obj:schema.Employees, session: Session):
     
     session.delete(existing_obj)
     session.commit()

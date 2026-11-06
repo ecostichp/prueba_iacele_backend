@@ -26,26 +26,26 @@ def password_hashed_func(password_str: str) -> str:
     return password_hash.hash(password_str)
 
 
-async def read_by_username(username: str, session: Session):
+def read_by_username(username: str, session: Session):
 
     statement = select(schema.Authentications).where(schema.Authentications.username == username)
 
     return session.exec(statement).first()
 
 
-async def read_by_employee_id(key: id, session: Session):
+def read_by_employee_id(key: id, session: Session):
 
     statement = select(schema.Authentications).where(schema.Authentications.empleado_id == key)
 
     return session.exec(statement).first()
 
 
-async def read_by_id(id: int, session: Session):
+def read_by_id(id: int, session: Session):
 
     return session.get(schema.Authentications, id)
 
 
-async def create(new_obj: schema.AuthenticationsCreate, session: Session):
+def create(new_obj: schema.AuthenticationsCreate, session: Session):
     
     default_password = '123456'
     obj_data = new_obj.model_dump()
@@ -60,7 +60,7 @@ async def create(new_obj: schema.AuthenticationsCreate, session: Session):
     return db_obj
 
 
-async def update(existing_obj:schema.Authentications, obj_new_vals: schema.AuthenticationsUpdate, session: Session):
+def update(existing_obj:schema.Authentications, obj_new_vals: schema.AuthenticationsUpdate, session: Session):
     
     obj_new_data = obj_new_vals.model_dump(
         exclude = {
@@ -78,7 +78,7 @@ async def update(existing_obj:schema.Authentications, obj_new_vals: schema.Authe
     return db_obj
 
 
-async def delete(existing_obj:schema.Authentications, session: Session):
+def delete(existing_obj:schema.Authentications, session: Session):
     
     session.delete(existing_obj)
     session.commit()
@@ -87,14 +87,14 @@ async def delete(existing_obj:schema.Authentications, session: Session):
 
 
 
-async def change_in_authentication(employee_id: int, payload, session: Session):
+def change_in_authentication(employee_id: int, payload, session: Session):
     from ..empleados.crud import read_by_id as read_employee_by_id
 
-    employee = await read_employee_by_id(employee_id, session)
+    employee = read_employee_by_id(employee_id, session)
     if not employee:
         raise HTTPException(status_code=400, detail='El id del empleado no existe')
 
-    account = await read_by_employee_id(employee_id, session)
+    account = read_by_employee_id(employee_id, session)
 
     if payload.is_app_user:
         if account:
@@ -102,10 +102,10 @@ async def change_in_authentication(employee_id: int, payload, session: Session):
         username = (payload.username or "").strip()
         if not username:
             raise HTTPException(status_code=400, detail='Falta el username')
-        if await read_by_username(username, session):
+        if read_by_username(username, session):
             raise HTTPException(status_code=400, detail='Ya existe un usuario con ese username')
 
-        await create(
+        create(
             schema.AuthenticationsCreate(
                 username=username,
                 avatar=f"{username}.png",
@@ -142,8 +142,8 @@ async def change_in_authentication(employee_id: int, payload, session: Session):
 
 
 
-async def authenticate_user(username: str, password_str: str, session: Session)-> schema.Authentications|None:
-    user_authenticated = await read_by_username(username, session)
+def authenticate_user(username: str, password_str: str, session: Session)-> schema.Authentications|None:
+    user_authenticated = read_by_username(username, session)
 
     if user_authenticated and user_authenticated.verify_password(password_str):
         return user_authenticated
@@ -151,7 +151,7 @@ async def authenticate_user(username: str, password_str: str, session: Session)-
     return None
 
 
-async def create_token(user_authenticated: schema.Authentications)-> schema.Token:
+def create_token(user_authenticated: schema.Authentications)-> schema.Token:
     
     user_authenticated_data = user_authenticated.model_dump(
         exclude = {
@@ -165,20 +165,20 @@ async def create_token(user_authenticated: schema.Authentications)-> schema.Toke
     return schema.Token(access_token=token, token_type="bearer")
 
 
-async def get_current_user_from_token(token: Annotated[str, Depends(oauth2_scheme)], session: SessionDep):
+def get_current_user_from_token(token: Annotated[str, Depends(oauth2_scheme)], session: SessionDep):
 
     try:
         # El decode puede fallar si el token no lleva los segmentos necesarios.
         payload = decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         # Si la función no encuentra el id, retornará None. 
         # Además, si por alguna razón el payload no tiene la llave 'id' y rompe la función, se va al exception.
-        return await read_by_id(payload['id'], session)
+        return read_by_id(payload['id'], session)
     
     except:
         return None
 
 
-async def require_user_authenticated(current_user: Annotated[schema.Authentications, Depends(get_current_user_from_token)]):
+def require_user_authenticated(current_user: Annotated[schema.Authentications, Depends(get_current_user_from_token)]):
     if not current_user:
         raise HTTPException(
             status_code=401, 

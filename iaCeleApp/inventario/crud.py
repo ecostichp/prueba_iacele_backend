@@ -6,7 +6,7 @@ from . import schema
 from ..productos import schema as schema_productos
 from ..equipos import schema as schema_equipos
 
-async def read_all_limit(session: Session, offset: int, limit: int|None):
+def read_all_limit(session: Session, offset: int, limit: int|None):
 
     statement = select(schema.Inventory).offset(offset).limit(limit)
     all = session.exec(statement).all()
@@ -14,14 +14,14 @@ async def read_all_limit(session: Session, offset: int, limit: int|None):
     return all
 
 
-async def read_by_key(key: int, session: Session):
+def read_by_key(key: int, session: Session):
 
     statement = select(schema.Inventory).where(schema.Inventory.id_products == key)
 
     return session.exec(statement).first()
 
 
-async def read_by_id(id: int, session: Session):
+def read_by_id(id: int, session: Session):
 
     return session.get(schema.Inventory, id)
 
@@ -33,7 +33,7 @@ def _register_dict(inventory: schema.Inventory) -> dict:
     return data
 
 
-async def create(new_obj: schema.InventoryCreate, session: Session):
+def create(new_obj: schema.InventoryCreate, session: Session):
     
     db_obj = schema.Inventory.model_validate(new_obj)
     db_obj.date_create = as_utc(db_obj.date_create)
@@ -45,7 +45,7 @@ async def create(new_obj: schema.InventoryCreate, session: Session):
     return db_obj
 
 
-async def delete(existing_obj:schema.Inventory, session: Session):
+def delete(existing_obj:schema.Inventory, session: Session):
     
     session.delete(existing_obj)
     session.commit()
@@ -53,14 +53,14 @@ async def delete(existing_obj:schema.Inventory, session: Session):
     return 'Producto borrado con éxito'
 
 
-async def delete_all(session: Session):
+def delete_all(session: Session):
     result = session.exec(delete_rows(schema.Inventory))
     deleted = int(result.rowcount or 0)
     session.commit()
     return deleted
 
 
-async def read_invidual_code_registers_all(employee_id: int, id_product: int, session: Session):
+def read_invidual_code_registers_all(employee_id: int, id_product: int, session: Session):
 
     statement = (
             select(
@@ -107,7 +107,7 @@ async def read_invidual_code_registers_all(employee_id: int, id_product: int, se
     ]
 
 
-async def read_invidual_registers_limit(employee_id: int, session: Session, offset: int, limit: int|None):
+def read_invidual_registers_limit(employee_id: int, session: Session, offset: int, limit: int|None):
 
     statement = (
             select(
@@ -134,7 +134,7 @@ async def read_invidual_registers_limit(employee_id: int, session: Session, offs
     return [dict(row._mapping) for row in all_registers]
 
 
-async def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offset: int, limit: int|None):
+def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offset: int, limit: int|None):
         
     empleado_id_a = team.empleado_id_a
     empleado_id_b = team.empleado_id_b

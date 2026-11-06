@@ -4,26 +4,26 @@ from datetime import datetime
 from . import schema
 
 
-async def read_all_limit(session: Session, offset: int, limit: int|None):
+def read_all_limit(session: Session, offset: int, limit: int|None):
 
     statement = select(schema.Products).offset(offset).limit(limit)
 
     return session.exec(statement).all()
 
 
-async def read_by_key(key: int, session: Session):
+def read_by_key(key: int, session: Session):
 
     statement = select(schema.Products).where(schema.Products.id_odoo == key)
 
     return session.exec(statement).first()
 
 
-async def read_by_id(id: int, session: Session):
+def read_by_id(id: int, session: Session):
 
     return session.get(schema.Products, id)
 
 
-async def create(new_obj: schema.ProductsCreate, session: Session):
+def create(new_obj: schema.ProductsCreate, session: Session):
     
     db_obj = schema.Products.model_validate(new_obj)
 
@@ -34,7 +34,7 @@ async def create(new_obj: schema.ProductsCreate, session: Session):
     return db_obj
 
 
-async def update(existing_obj:schema.Products, obj_new_vals: schema.ProductsUpdate, session: Session):
+def update(existing_obj:schema.Products, obj_new_vals: schema.ProductsUpdate, session: Session):
     
     obj_new_data = obj_new_vals.model_dump()
     db_obj = existing_obj.sqlmodel_update(obj_new_data)
@@ -46,7 +46,7 @@ async def update(existing_obj:schema.Products, obj_new_vals: schema.ProductsUpda
     return db_obj
 
 
-async def delete(existing_obj:schema.Products, session: Session):
+def delete(existing_obj:schema.Products, session: Session):
     
     session.delete(existing_obj)
     session.commit()

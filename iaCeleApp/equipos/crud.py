@@ -3,7 +3,7 @@ from sqlmodel  import Session, select, or_
 from . import schema
 
 
-async def read_all_limit(session: Session, offset: int, limit: int|None):
+def read_all_limit(session: Session, offset: int, limit: int|None):
 
     statement = select(schema.Teams).offset(offset).limit(limit)
     all = session.exec(statement).all()
@@ -11,7 +11,7 @@ async def read_all_limit(session: Session, offset: int, limit: int|None):
     return all
 
 
-async def read_by_employees(id_a: int, id_b: int, session: Session):
+def read_by_employees(id_a: int, id_b: int, session: Session):
 
     statement = select(schema.Teams).where(
         or_(
@@ -23,12 +23,12 @@ async def read_by_employees(id_a: int, id_b: int, session: Session):
     return session.exec(statement).first()
 
 
-async def read_by_id(id: int, session: Session):
+def read_by_id(id: int, session: Session):
 
     return session.get(schema.Teams, id)
 
 
-async def create(new_obj: schema.TeamsCreate, session: Session):
+def create(new_obj: schema.TeamsCreate, session: Session):
     
     db_obj = schema.Teams.model_validate(new_obj)
 
@@ -39,7 +39,7 @@ async def create(new_obj: schema.TeamsCreate, session: Session):
     return db_obj
 
 
-async def update(existing_obj:schema.Teams, obj_new_vals: schema.TeamsUpdate, session: Session):
+def update(existing_obj:schema.Teams, obj_new_vals: schema.TeamsUpdate, session: Session):
     
     obj_new_data = obj_new_vals.model_dump()
     db_obj = existing_obj.sqlmodel_update(obj_new_data)
@@ -51,7 +51,7 @@ async def update(existing_obj:schema.Teams, obj_new_vals: schema.TeamsUpdate, se
     return db_obj
 
 
-async def delete(existing_obj:schema.Teams, session: Session):
+def delete(existing_obj:schema.Teams, session: Session):
     
     session.delete(existing_obj)
     session.commit()
