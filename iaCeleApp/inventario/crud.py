@@ -1,5 +1,6 @@
 from sqlmodel  import Session, select, func, case, alias
 
+from ..timeutil import as_utc
 from . import schema
 from ..productos import schema as schema_productos
 from ..equipos import schema as schema_equipos
@@ -24,9 +25,17 @@ async def read_by_id(id: int, session: Session):
     return session.get(schema.Inventory, id)
 
 
+def _register_dict(inventory: schema.Inventory) -> dict:
+    data = dict(inventory)
+    created = as_utc(data.get("date_create"))
+    data["date_create"] = None if created is None else created.isoformat()
+    return data
+
+
 async def create(new_obj: schema.InventoryCreate, session: Session):
     
     db_obj = schema.Inventory.model_validate(new_obj)
+    db_obj.date_create = as_utc(db_obj.date_create)
 
     session.add(db_obj)
     session.commit()
@@ -85,7 +94,7 @@ async def read_invidual_code_registers_all(employee_id: int, id_product: int, se
                     if reg._mapping["Inventory"].count_qty is not None
                 ),
             },
-            "registers": [dict(row._mapping['Inventory']) for row in all_registers]
+            "registers": [_register_dict(row._mapping["Inventory"]) for row in all_registers]
         }
     ]
 
@@ -97,7 +106,8 @@ async def read_invidual_registers_limit(employee_id: int, session: Session, offs
                 schema.Inventory.id_products,
                 schema_productos.Products.code,
                 schema_productos.Products.name,
-                func.sum(schema.Inventory.count_qty).label("total_qty")
+                func.sum(schema.Inventory.count_qty).label("total_qty"),
+                func.max(schema.Inventory.date_create).label("last_count"),
             )
             .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
             .where(schema.Inventory.assigned_user_id == employee_id)

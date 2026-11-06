@@ -1,6 +1,8 @@
 from typing import Optional
-from sqlmodel import SQLModel, Field, Relationship, CheckConstraint, func
-from sqlmodel.main import NaiveDatetime
+from datetime import datetime
+from sqlmodel import SQLModel, Field, Relationship, CheckConstraint
+
+from ..timeutil import utc_now
 
 
 class TeamsBase(SQLModel):
@@ -19,7 +21,7 @@ class Teams(TeamsBase, table=True):
     )
 
     id: int|None = Field(default=None, primary_key=True)
-    create_date: NaiveDatetime|None = Field(default=None, sa_column_kwargs={"server_default": func.now()})
+    create_date: datetime | None = Field(default_factory=utc_now)
     
     empleado_a: Optional["Employees"] = Relationship(
         sa_relationship_kwargs={

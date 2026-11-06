@@ -1,7 +1,10 @@
 from typing import Optional
+from datetime import datetime
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, func
-from sqlmodel.main import NaiveDatetime
+from pydantic import field_serializer
+from sqlmodel import SQLModel, Field, Relationship
+
+from ..timeutil import as_utc, utc_now
 
 
 class TipoConteo(str, Enum):
@@ -26,7 +29,12 @@ class InventoryCreate(InventoryBase):
 
 class Inventory(InventoryBase, table=True):
     id: int|None = Field(default=None, primary_key=True)
-    date_create: NaiveDatetime|None = Field(default=None, sa_column_kwargs={"server_default": func.now()})
+    date_create: datetime | None = Field(default_factory=utc_now)
+
+    @field_serializer("date_create")
+    def serialize_date_create(self, value):
+        converted = as_utc(value)
+        return None if converted is None else converted.isoformat()
     assigned_user_team: Optional["Teams"] | None = Relationship(
         sa_relationship_kwargs={
         "uselist": False,
@@ -52,6 +60,12 @@ class Inventory_InvididualRegisters(SQLModel):
     code: str
     name: str
     total_qty: float
+    last_count: datetime | None = None
+
+    @field_serializer("last_count")
+    def serialize_last_count(self, value):
+        converted = as_utc(value)
+        return None if converted is None else converted.isoformat()
 
 
 class Inventory_InvididualProductAllRegisters(SQLModel):
