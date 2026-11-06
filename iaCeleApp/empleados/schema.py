@@ -14,6 +14,7 @@ class EmployeesBase(SQLModel):
 
 
 class EmployeesCreate(EmployeesBase):
+    id: int | None = None
     hire_date_str: str
 
 

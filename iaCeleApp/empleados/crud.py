@@ -1,5 +1,6 @@
 from sqlmodel  import Session, select
 from datetime import datetime
+from sqlalchemy import text
 
 from ..timeutil import as_utc
 from . import schema
@@ -31,11 +32,19 @@ async def create(new_obj: schema.EmployeesCreate, session: Session):
             'hire_date_str'
         }
     )
+    if obj_data.get('id') is None:
+        obj_data.pop('id', None)
     obj_data['hire_date'] = as_utc(datetime.strptime(new_obj.hire_date_str, r"%Y-%m-%d"))
 
     db_obj = schema.Employees(**obj_data)
 
     session.add(db_obj)
+    session.flush()
+    if new_obj.id is not None and session.get_bind().dialect.name == "postgresql":
+        session.execute(text(
+            "SELECT setval(pg_get_serial_sequence('employees', 'id'), "
+            "(SELECT MAX(id) FROM employees))"
+        ))
     session.commit()
     session.refresh(db_obj)
 
