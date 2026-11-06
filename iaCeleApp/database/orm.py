@@ -36,6 +36,7 @@ def build_engine():
                 host=settings.gcloud_sql_ip,
                 port=5432,
                 database=settings.gcloud_sql_db,
+                query={"gssencmode": "disable"},
             ),
             pool_pre_ping=True,
         )
@@ -49,7 +50,12 @@ def build_engine():
                 username=settings.gcloud_sql_user,
                 password=settings.gcloud_sql_password,
                 database=settings.gcloud_sql_db,
-                query={"host": socket_dir},
+                query={
+                    "host": socket_dir,
+                    # El proxy de Cloud Run cierra el socket si libpq intenta GSS o SSL.
+                    "gssencmode": "disable",
+                    "sslmode": "disable",
+                },
             ),
             pool_pre_ping=True,
         )
