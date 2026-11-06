@@ -59,6 +59,20 @@ async def read_invidual_code_registers_all(employee_id: int, id_product: int, se
         )
 
     all_registers = session.exec(statement).all()
+
+    if not all_registers:
+        product = session.get(schema_productos.Products, id_product)
+        return [
+            {
+                "product_id": {
+                    "id": product.id if product else id_product,
+                    "code": product.code if product else "",
+                    "name": product.name if product else "",
+                    "total_qty": 0,
+                },
+                "registers": [],
+            }
+        ]
     
     return [
         {
