@@ -39,6 +39,8 @@ echo "GCSFuse mounted successfully."
 
 # En el contenedor la app siempre usa el socket de Cloud SQL.
 export DB_MODE=cloudsql
+export PGGSSENCMODE=disable
+export PGSSLNEGOTIATION=postgres
 
 : "${GCLOUD_SQL_NAME:?ERROR: GCLOUD_SQL_NAME no está configurado.}"
 : "${GCLOUD_SQL_DB:?ERROR: GCLOUD_SQL_DB no está configurado.}"

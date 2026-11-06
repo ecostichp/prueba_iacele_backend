@@ -6,7 +6,9 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     GCSFUSE_MOUNT_DIR=/backend/bucket \
     DEBIAN_FRONTEND=noninteractive \
-    DB_MODE=cloudsql
+    DB_MODE=cloudsql \
+    PGGSSENCMODE=disable \
+    PGSSLNEGOTIATION=postgres
 
 # Directorio de trabajo
 WORKDIR /backend
