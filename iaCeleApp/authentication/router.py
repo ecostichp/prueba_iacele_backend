@@ -44,7 +44,33 @@ def generate_token(session: SessionDep, form_data: OAuth2PasswordRequestForm = D
         raise HTTPException(
             status_code=401, detail="Usuario y/o Contraseña inválidos")
 
+    access = crud.get_app_access(session)
+    if not access.login_open and not crud.is_director_general(user_authenticated, session):
+        raise HTTPException(
+            status_code=403,
+            detail="La entrada está cerrada. No se puede iniciar sesión.",
+        )
+
     return crud.create_token(user_authenticated)
+
+
+@router.get("/access", response_model=schema.AccessState)
+def read_access(session: SessionDep):
+    access = crud.get_app_access(session)
+    return schema.AccessState(login_open=access.login_open)
+
+
+@router.put("/access", response_model=schema.AccessState)
+def update_access(
+    body: schema.AccessState,
+    session: SessionDep,
+    current_user: Annotated[schema.Authentications, Depends(crud.require_user_authenticated)],
+):
+    if not crud.is_director_general(current_user, session):
+        raise HTTPException(status_code=403, detail="No puedes cambiar la entrada")
+
+    access = crud.set_login_open(body.login_open, session)
+    return schema.AccessState(login_open=access.login_open)
 
 
 @router.get("/user/me", response_model=schema.AuthenticationsPublic)

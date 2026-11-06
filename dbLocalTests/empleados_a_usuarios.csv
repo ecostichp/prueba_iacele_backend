@@ -1,0 +1,32 @@
+Eq,Hoja,username,avatar,counting_user_id,assigned_user_id,empleado_id,nombre_completo,id_odoo
+,,lic,lic.png,1,1,1,Emilio Costich Pérez,1
+A1,Ángela,angela,angela.png,2,2,2,Ángela Aracely Costich Pérez,2
+A1,Hector,hector,hector.png,21,21,21,Hector García Galindo,295
+A1,Marco,marco,marco.png,26,26,26,Marco Antonio Mondragon Palatizn,296
+A1,Rodolfo,rodolfo,rodolfo.png,34,34,34,Rodolfo Rodriguez Leyva,278
+A1,Ulises,ulises,ulises.png,38,38,38,Ulises López Primo,276
+A1,Pável,pavel,pavel.png,32,32,32,Pavel Hernández Reza,27
+A1,Xiomara,xiomara,xiomara.png,40,40,40,Xiomara Ceseña Burgoin,289
+A1,Alisson,alisson,alisson.png,5,5,5,Alisson Valentina Zamora Camacho,299
+A1,Alexa,alexa,alexa.png,4,4,4,Alexa Yadira Mazariegos Zunun,5
+A1,Gladiz,gladiz,gladiz.png,17,17,17,Gladys Carraman Morales,255
+A1,Carlos G,carlosg,carlosg.png,9,9,9,Carlos Manuel Guzmán Rios,10
+A1,Evlin,evlin,evlin.png,15,15,15,Evlin Sánchez Lucio,238
+A1,Adilene,adilene,adilene.png,3,3,3,Adilene Jacqueline Rodríguez Lara,219
+A1,Brenda,brenda,brenda.png,7,7,7,Brenda Luz Acosta Lopez,8
+A1,Edgar,edgar,edgar.png,11,11,11,Edgar Cuitlahuac Cosme Benitez,298
+A2,Bianca,bianca,bianca.png,6,6,6,Bianca Sánchez Valenciano,7
+A2,Lety,lety,lety.png,25,25,25,Leticia Terán Salinas,21
+A2,Mayra,mayra,mayra.png,28,28,28,Mayra Angelica Parada Manjarrez,24
+A2,Mariana,mariana,mariana.png,27,27,27,Mariana Araceli Carvajal Flores,23
+A2,Rosario,rosario,rosario.png,35,35,35,Rosario Martinez Zarate,29
+A2,Carlos H,carlosh,carlosh.png,8,8,8,Carlos Humberto Briones Contreras,9
+A2,Reyna,reyna,reyna.png,33,33,33,Reyna Arriaga Flores,28
+A2,Paty,paty,paty.png,31,31,31,Patricia Flores Pantaleón,26
+A2,Irma,irma,irma.png,22,22,22,Irma Carvajal Flores,18
+A2,Gretel,gretel,gretel.png,19,19,19,Gretel Gómez Alcázar,17
+A2,Wendy,wendy,wendy.png,39,39,39,Wendy Guadalupe González Medel,283
+A2,Yeni,yeni,yeni.png,43,43,43,Yeni Yaqueline Cardenas Gutierrez,36
+A2,Yahaida,yahaida,yahaida.png,41,41,41,Yahaida Castro Flores,263
+A2,Yamilet,yamilet,yamilet.png,42,42,42,Yamilet Blanco Salas,33
+A2,Guilfrido,gulfrido,gulfrido.png,20,20,20,Gulfrido Vazquez Amaya,279

@@ -9,6 +9,7 @@ from datetime import timedelta
 
 from . import schema
 from ..database import SessionDep
+from ..timeutil import as_utc, utc_now
 
 
 JWT_SECRET = "acdebbc350cbe8730b24198ae98015f38ea64e72857d0b14c51370b5a60d3e57"
@@ -142,8 +143,65 @@ def change_in_authentication(employee_id: int, payload, session: Session):
 
 
 
+def get_app_access(session: Session) -> schema.AppAccess:
+    row = session.get(schema.AppAccess, 1)
+    if row:
+        return row
+
+    row = schema.AppAccess(id=1, login_open=True)
+    session.add(row)
+    try:
+        session.commit()
+    except Exception:
+        session.rollback()
+        row = session.get(schema.AppAccess, 1)
+        if row:
+            return row
+        raise
+    session.refresh(row)
+    return row
+
+
+def set_login_open(login_open: bool, session: Session) -> schema.AppAccess:
+    access = get_app_access(session)
+    access.login_open = login_open
+    if not login_open:
+        access.tokens_valid_after = utc_now()
+    session.add(access)
+    session.commit()
+    session.refresh(access)
+    return access
+
+
+def is_director_general(user: schema.Authentications | None, session: Session) -> bool:
+    if not user or not user.empleado_id:
+        return False
+
+    from ..empleados.crud import read_by_id as read_employee_by_id
+
+    employee = read_employee_by_id(user.empleado_id, session)
+    title = (employee.job_title if employee else "").strip().casefold()
+    return title == "director general"
+
+
+def session_was_revoked(payload: dict, cutoff: datetime | None) -> bool:
+    if cutoff is None:
+        return False
+
+    issued_at = payload.get("iat")
+    if issued_at is None:
+        return True
+
+    if isinstance(issued_at, datetime):
+        issued = as_utc(issued_at)
+    else:
+        issued = datetime.fromtimestamp(int(issued_at), timezone.utc)
+
+    return issued <= as_utc(cutoff)
+
+
 def authenticate_user(username: str, password_str: str, session: Session)-> schema.Authentications|None:
-    user_authenticated = read_by_username(username, session)
+    user_authenticated = read_by_username(username.strip().casefold(), session)
 
     if user_authenticated and user_authenticated.verify_password(password_str):
         return user_authenticated
@@ -159,7 +217,9 @@ def create_token(user_authenticated: schema.Authentications)-> schema.Token:
             'fecha_alta'
         }
     )
-    user_authenticated_data['exp'] = datetime.now(timezone.utc) + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    now = datetime.now(timezone.utc)
+    user_authenticated_data['iat'] = int(now.timestamp())
+    user_authenticated_data['exp'] = now + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
     token = encode(user_authenticated_data, JWT_SECRET, algorithm=ALGORITHM)
 
     return schema.Token(access_token=token, token_type="bearer")
@@ -172,10 +232,22 @@ def get_current_user_from_token(token: Annotated[str, Depends(oauth2_scheme)], s
         payload = decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         # Si la función no encuentra el id, retornará None. 
         # Además, si por alguna razón el payload no tiene la llave 'id' y rompe la función, se va al exception.
-        return read_by_id(payload['id'], session)
-    
-    except:
+        user = read_by_id(payload['id'], session)
+    except Exception:
         return None
+
+    if not user:
+        return None
+
+    # El director sigue dentro aunque la entrada esté cerrada.
+    if is_director_general(user, session):
+        return user
+
+    access = get_app_access(session)
+    if session_was_revoked(payload, access.tokens_valid_after):
+        return None
+
+    return user
 
 
 def require_user_authenticated(current_user: Annotated[schema.Authentications, Depends(get_current_user_from_token)]):

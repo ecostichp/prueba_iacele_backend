@@ -1,6 +1,7 @@
 from typing import Optional
 from enum import Enum
 from datetime import datetime
+from pydantic import model_validator
 from sqlmodel import SQLModel, Field, Relationship
 
 from ..timeutil import utc_now
@@ -24,6 +25,14 @@ class AuthenticationsBase(SQLModel):
 
 class AuthenticationsCreate(AuthenticationsBase):
     avatar: str | None = None
+    counting_user_id: int | None = None
+    assigned_user_id: int | None = None
+
+    @model_validator(mode="after")
+    def set_user_ids_from_empleado(self):
+        self.counting_user_id = self.empleado_id
+        self.assigned_user_id = self.empleado_id
+        return self
 
 class Authentications(AuthenticationsBase, table=True):
     id: int|None = Field(default=None, primary_key=True)
@@ -60,3 +69,14 @@ class AuthenticationsPublic(SQLModel):
 class Token(SQLModel):
     access_token: str
     token_type: str
+
+
+class AppAccess(SQLModel, table=True):
+    __tablename__ = "app_access"
+    id: int | None = Field(default=None, primary_key=True)
+    login_open: bool = True
+    tokens_valid_after: datetime | None = None
+
+
+class AccessState(SQLModel):
+    login_open: bool
