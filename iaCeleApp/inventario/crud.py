@@ -220,7 +220,7 @@ def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offs
     empleado_id_a = team.empleado_id_a
     empleado_id_b = team.empleado_id_b
 
-    # Solo conteos propios: quien contó es la misma persona a la que se asignó.
+    # Conteos propios de cualquier equipo. El equipo solo indica a quiénes se compara.
     propios = (
         select(
             schema.Inventory.id_products,
@@ -228,7 +228,6 @@ def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offs
             schema.Inventory.count_qty,
         )
         .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
-        .where(schema.Inventory.assigned_team_id == team.id)
         .where(schema.Inventory.count_type == schema.TipoConteo.individual)
     ).subquery()
 
