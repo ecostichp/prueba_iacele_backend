@@ -98,29 +98,106 @@ def set_inventory_stage(stage: schema.TipoConteo, session: Session) -> schema.In
 
 
 def assign_counts_to_counters(session: Session) -> None:
-    individual = schema.Inventory.count_type == schema.TipoConteo.individual
-    session.exec(
-        update(schema.Inventory)
-        .where(individual)
-        .where(schema.Inventory.assigned_user_id != schema.Inventory.counting_user_id)
-        .values(assigned_user_id=schema.Inventory.counting_user_id)
-    )
-    teams = session.exec(select(schema_equipos.Teams)).all()
-    for team in teams:
-        for member in (team.empleado_id_a, team.empleado_id_b):
-            if not member:
-                continue
-            session.exec(
-                update(schema.Inventory)
-                .where(individual)
-                .where(schema.Inventory.counting_user_id == member)
-                .values(assigned_user_id=member, assigned_team_id=team.id)
-            )
     session.exec(
         update(schema.Inventory)
         .where(schema.Inventory.count_type != schema.TipoConteo.individual)
         .values(assigned_user_id=None)
     )
+
+
+def repair_help_assignments(session: Session) -> int:
+    from ..authentication.schema import AssignmentNotice, DataRepair
+    from ..database.config import settings
+
+    if settings.db_mode.strip().lower() == "sqlite":
+        return 0
+
+    repair_id = "help-assignments-v1"
+    if session.get(DataRepair, repair_id):
+        print(f"REPAIR {repair_id} ya estaba aplicado")
+        return 0
+
+    notices = session.exec(select(AssignmentNotice)).all()
+    teams = session.exec(select(schema_equipos.Teams)).all()
+    team_by_member = {}
+    for team in teams:
+        if team.id is None:
+            continue
+        if team.empleado_id_a:
+            team_by_member[team.empleado_id_a] = team.id
+        if team.empleado_id_b:
+            team_by_member[team.empleado_id_b] = team.id
+
+    by_helper = {}
+    for notice in notices:
+        if notice.empleado_id is None or notice.fecha_alta is None:
+            continue
+        by_helper.setdefault(notice.empleado_id, []).append(notice)
+
+    windows = []
+    for helper_id, items in by_helper.items():
+        items.sort(key=lambda notice: (as_utc(notice.fecha_alta), notice.id or 0))
+        for index, notice in enumerate(items):
+            if notice.assigned_user_id == helper_id:
+                continue
+            start = as_utc(notice.fecha_alta)
+            end = as_utc(items[index + 1].fecha_alta) if index + 1 < len(items) else None
+            windows.append((
+                helper_id,
+                start,
+                end,
+                notice.assigned_user_id,
+                team_by_member.get(notice.assigned_user_id),
+            ))
+
+    changed = 0
+    if windows:
+        helper_ids = list({window[0] for window in windows})
+        rows = session.exec(
+            select(schema.Inventory)
+            .where(schema.Inventory.count_type == schema.TipoConteo.individual)
+            .where(schema.Inventory.counting_user_id.in_(helper_ids))
+        ).all()
+        for row in rows:
+            created = as_utc(row.date_create)
+            if created is None:
+                continue
+            match = None
+            for helper_id, start, end, target_id, team_id in windows:
+                if row.counting_user_id != helper_id or created < start:
+                    continue
+                if end is not None and created >= end:
+                    continue
+                match = (target_id, team_id)
+                break
+            if match is None:
+                continue
+            target_id, team_id = match
+            same_user = row.assigned_user_id == target_id
+            same_team = team_id is None or row.assigned_team_id == team_id
+            if same_user and same_team:
+                continue
+            print(
+                f"REPAIR inventory {row.id} assigned {row.assigned_user_id} -> {target_id}"
+                f" team {row.assigned_team_id} -> {team_id if team_id is not None else row.assigned_team_id}"
+            )
+            row.assigned_user_id = target_id
+            if team_id is not None:
+                row.assigned_team_id = team_id
+            session.add(row)
+            changed += 1
+
+    session.add(DataRepair(id=repair_id))
+    try:
+        session.commit()
+    except Exception as error:
+        session.rollback()
+        if session.get(DataRepair, repair_id):
+            print(f"REPAIR {repair_id} ya estaba aplicado")
+            return 0
+        raise error
+    print(f"REPAIR {repair_id} updated={changed}")
+    return changed
 
 
 def delete_all(session: Session):

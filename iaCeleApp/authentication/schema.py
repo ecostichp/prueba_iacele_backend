@@ -105,3 +105,9 @@ class AssignmentNoticePublic(SQLModel):
     id: int
     assigned_user_id: int
     message: str
+
+
+class DataRepair(SQLModel, table=True):
+    __tablename__ = "data_repairs"
+    id: str = Field(primary_key=True)
+    applied_at: datetime | None = Field(default_factory=utc_now)

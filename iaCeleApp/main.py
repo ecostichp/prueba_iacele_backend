@@ -8,6 +8,13 @@ from .database import create_db_and_tables
 async def lifespan(app: FastAPI):
     # Se ejecuta al iniciar el servidor (Reemplaza a @app.on_event("startup"))
     create_db_and_tables()
+    from sqlmodel import Session
+
+    from .database.orm import engine
+    from .inventario.crud import repair_help_assignments
+
+    with Session(engine) as session:
+        repair_help_assignments(session)
     
     yield # Aquí la API se queda escuchando peticiones
     
