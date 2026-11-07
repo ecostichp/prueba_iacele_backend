@@ -220,43 +220,47 @@ def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offs
     empleado_id_a = team.empleado_id_a
     empleado_id_b = team.empleado_id_b
 
-    # 2. Definimos la estructura base de la consulta para el Empleado 1 (stmt1)
-    stmt1 = (
+    # Solo conteos propios: quien contó es la misma persona a la que se asignó.
+    propios = (
         select(
             schema.Inventory.id_products,
-            schema_productos.Products.code.label("code_a"),
-            schema_productos.Products.name.label("name_a"),
-            func.sum(schema.Inventory.count_qty).label("total_qty_a")
+            schema.Inventory.assigned_user_id,
+            schema.Inventory.count_qty,
         )
-        .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
-        .where(schema.Inventory.assigned_user_id == empleado_id_a)
         .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
         .where(schema.Inventory.assigned_team_id == team.id)
         .where(schema.Inventory.count_type == schema.TipoConteo.individual)
+    ).subquery()
+
+    stmt1 = (
+        select(
+            propios.c.id_products,
+            schema_productos.Products.code.label("code_a"),
+            schema_productos.Products.name.label("name_a"),
+            func.sum(propios.c.count_qty).label("total_qty_a"),
+        )
+        .join(schema_productos.Products, propios.c.id_products == schema_productos.Products.id)
+        .where(propios.c.assigned_user_id == empleado_id_a)
         .group_by(
-            schema.Inventory.id_products, 
-            schema_productos.Products.code, 
-            schema_productos.Products.name
+            propios.c.id_products,
+            schema_productos.Products.code,
+            schema_productos.Products.name,
         )
     ).subquery()
 
-    # 3. Definimos la estructura base de la consulta para el Empleado 2 (stmt2)
     stmt2 = (
         select(
-            schema.Inventory.id_products,
+            propios.c.id_products,
             schema_productos.Products.code.label("code_b"),
             schema_productos.Products.name.label("name_b"),
-            func.sum(schema.Inventory.count_qty).label("total_qty_b")
+            func.sum(propios.c.count_qty).label("total_qty_b"),
         )
-        .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
-        .where(schema.Inventory.assigned_user_id == empleado_id_b)
-        .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
-        .where(schema.Inventory.assigned_team_id == team.id)
-        .where(schema.Inventory.count_type == schema.TipoConteo.individual)
+        .join(schema_productos.Products, propios.c.id_products == schema_productos.Products.id)
+        .where(propios.c.assigned_user_id == empleado_id_b)
         .group_by(
-            schema.Inventory.id_products, 
-            schema_productos.Products.code, 
-            schema_productos.Products.name
+            propios.c.id_products,
+            schema_productos.Products.code,
+            schema_productos.Products.name,
         )
     ).subquery()
 
