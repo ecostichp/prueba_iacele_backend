@@ -226,7 +226,6 @@ def read_invidual_code_registers_all(
             )
             .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
             .where(owner == employee_id)
-            .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
             .where(schema.Inventory.count_type == kind)
             .where(schema.Inventory.id_products == id_product)
         )
@@ -297,14 +296,14 @@ def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offs
     empleado_id_a = team.empleado_id_a
     empleado_id_b = team.empleado_id_b
 
-    # Conteos propios de cualquier equipo. El equipo solo indica a quiénes se compara.
+    # Todo lo asignado a cada persona, aunque lo haya contado alguien más.
+    # El equipo solo indica a quiénes se compara.
     propios = (
         select(
             schema.Inventory.id_products,
             schema.Inventory.assigned_user_id,
             schema.Inventory.count_qty,
         )
-        .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
         .where(schema.Inventory.count_type == schema.TipoConteo.individual)
     ).subquery()
 
