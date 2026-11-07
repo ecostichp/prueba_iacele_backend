@@ -28,6 +28,18 @@ def read_by_id(id: int, session: Session):
     return session.get(schema.Teams, id)
 
 
+def read_by_member(employee_id: int, session: Session):
+
+    statement = select(schema.Teams).where(
+        or_(
+            schema.Teams.empleado_id_a == employee_id,
+            schema.Teams.empleado_id_b == employee_id,
+        )
+    )
+
+    return session.exec(statement).first()
+
+
 def create(new_obj: schema.TeamsCreate, session: Session):
     
     db_obj = schema.Teams.model_validate(new_obj)

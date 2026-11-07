@@ -88,6 +88,79 @@ def delete(existing_obj:schema.Authentications, session: Session):
 
 
 
+def assign_helpers(items: list[schema.UserAssignment], session: Session) -> list[schema.Authentications]:
+    from ..empleados.crud import read_by_id as read_employee_by_id
+    from ..equipos.crud import read_by_member
+
+    updated = []
+    for item in items:
+        account = read_by_employee_id(item.empleado_id, session)
+        if not account or not account.empleado_id:
+            raise HTTPException(status_code=400, detail="Ese empleado no tiene usuario")
+
+        target = read_employee_by_id(item.assigned_user_id, session)
+        if not target:
+            raise HTTPException(status_code=400, detail="La persona asignada no existe")
+        if not read_by_member(target.id, session):
+            raise HTTPException(status_code=400, detail="La persona asignada no tiene equipo")
+        if account.empleado_id != target.id:
+            own_team = read_by_member(account.empleado_id, session)
+            target_team = read_by_member(target.id, session)
+            if own_team and target_team and own_team.id == target_team.id:
+                raise HTTPException(
+                    status_code=400,
+                    detail="No puedes asignar a alguien a su mismo equipo",
+                )
+
+        previous_assigned = account.assigned_user_id or account.empleado_id
+        account.counting_user_id = account.empleado_id
+        account.assigned_user_id = target.id
+        session.add(account)
+        updated.append(account)
+
+        if previous_assigned != target.id:
+            helper_name = account.empleado.name if account.empleado else "Esta persona"
+            if account.empleado_id == target.id:
+                message = f"{helper_name} vuelve a registrar sus propios conteos."
+            else:
+                message = f"{helper_name} está registrando conteos para {target.name}."
+            session.add(schema.AssignmentNotice(
+                empleado_id=account.empleado_id,
+                assigned_user_id=target.id,
+                message=message,
+            ))
+
+    session.commit()
+    for account in updated:
+        session.refresh(account)
+    return updated
+
+
+def take_assignment_notices(empleado_id: int | None, session: Session) -> list[schema.AssignmentNoticePublic]:
+    if not empleado_id:
+        return []
+
+    rows = session.exec(
+        select(schema.AssignmentNotice)
+        .where(schema.AssignmentNotice.empleado_id == empleado_id)
+        .where(schema.AssignmentNotice.seen == False)
+        .order_by(schema.AssignmentNotice.id)
+    ).all()
+    pending = [
+        schema.AssignmentNoticePublic(
+            id=row.id,
+            assigned_user_id=row.assigned_user_id,
+            message=row.message,
+        )
+        for row in rows
+    ]
+    for row in rows:
+        row.seen = True
+        session.add(row)
+    session.commit()
+    return pending
+
+
 def change_in_authentication(employee_id: int, payload, session: Session):
     from ..empleados.crud import read_by_id as read_employee_by_id
 
@@ -171,6 +244,29 @@ def set_login_open(login_open: bool, session: Session) -> schema.AppAccess:
     session.commit()
     session.refresh(access)
     return access
+
+
+def _folded_title(title: str) -> str:
+    import unicodedata
+
+    folded = unicodedata.normalize("NFD", (title or "").strip().casefold())
+    return "".join(char for char in folded if unicodedata.category(char) != "Mn")
+
+
+def is_manager(user: schema.Authentications | None, session: Session) -> bool:
+    if not user or not user.empleado_id:
+        return False
+
+    from ..empleados.crud import read_by_id as read_employee_by_id
+
+    employee = read_employee_by_id(user.empleado_id, session)
+    title = _folded_title(employee.job_title if employee else "")
+    if not title:
+        return False
+    if title.endswith("general"):
+        return True
+    words = [word for word in title.replace("-", " ").split() if word]
+    return "gerente" in words
 
 
 def is_director_general(user: schema.Authentications | None, session: Session) -> bool:

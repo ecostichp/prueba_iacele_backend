@@ -73,6 +73,26 @@ def update_access(
     return schema.AccessState(login_open=access.login_open)
 
 
+@router.put("/assignments", response_model=list[schema.AuthenticationsPublic])
+def update_assignments(
+    body: schema.UserAssignmentBatch,
+    session: SessionDep,
+    current_user: Annotated[schema.Authentications, Depends(crud.require_user_authenticated)],
+):
+    if not crud.is_manager(current_user, session):
+        raise HTTPException(status_code=403, detail="No puedes reasignar personal")
+
+    return crud.assign_helpers(body.items, session)
+
+
+@router.get("/notices", response_model=list[schema.AssignmentNoticePublic])
+def read_notices(
+    session: SessionDep,
+    current_user: Annotated[schema.Authentications, Depends(crud.require_user_authenticated)],
+):
+    return crud.take_assignment_notices(current_user.empleado_id, session)
+
+
 @router.get("/user/me", response_model=schema.AuthenticationsPublic)
 def read_authenticated_me(current_user:  Annotated[schema.Authentications, Depends(crud.require_user_authenticated)]):
 

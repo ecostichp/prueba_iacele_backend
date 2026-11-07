@@ -80,3 +80,28 @@ class AppAccess(SQLModel, table=True):
 
 class AccessState(SQLModel):
     login_open: bool
+
+
+class UserAssignment(SQLModel):
+    empleado_id: int
+    assigned_user_id: int
+
+
+class UserAssignmentBatch(SQLModel):
+    items: list[UserAssignment]
+
+
+class AssignmentNotice(SQLModel, table=True):
+    __tablename__ = "assignment_notices"
+    id: int | None = Field(default=None, primary_key=True)
+    empleado_id: int = Field(index=True)
+    assigned_user_id: int
+    message: str
+    seen: bool = False
+    fecha_alta: datetime | None = Field(default_factory=utc_now)
+
+
+class AssignmentNoticePublic(SQLModel):
+    id: int
+    assigned_user_id: int
+    message: str

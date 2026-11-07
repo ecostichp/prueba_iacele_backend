@@ -60,7 +60,12 @@ def delete_all(session: Session):
     return deleted
 
 
-def read_invidual_code_registers_all(employee_id: int, id_product: int, session: Session):
+def read_invidual_code_registers_all(
+    employee_id: int,
+    id_product: int,
+    session: Session,
+    by_counting: bool = False,
+):
 
     statement = (
             select(
@@ -70,7 +75,10 @@ def read_invidual_code_registers_all(employee_id: int, id_product: int, session:
                 schema_productos.Products.name,
             )
             .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
-            .where(schema.Inventory.assigned_user_id == employee_id)
+            .where(
+                (schema.Inventory.counting_user_id if by_counting else schema.Inventory.assigned_user_id)
+                == employee_id
+            )
             .where(schema.Inventory.count_type == 'individual')
             .where(schema.Inventory.id_products == id_product)
         )

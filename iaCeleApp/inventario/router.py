@@ -22,10 +22,32 @@ router = APIRouter(
 
 
 
+def stamp_count_owners(new_obj: schema.InventoryCreate, session: SessionDep) -> schema.InventoryCreate:
+    from ..authentication.crud import read_by_employee_id
+
+    account = read_by_employee_id(new_obj.counting_user_id, session)
+    if not account or not account.empleado_id:
+        raise HTTPException(status_code=400, detail="Quien cuenta no tiene usuario")
+
+    assigned_id = account.assigned_user_id or account.empleado_id
+    team = crud_equipos.read_by_member(assigned_id, session)
+    if not team or not team.id:
+        raise HTTPException(
+            status_code=400,
+            detail="La persona a la que se asigna el conteo no tiene equipo",
+        )
+
+    return new_obj.model_copy(update={
+        "counting_user_id": account.empleado_id,
+        "assigned_user_id": assigned_id,
+        "assigned_team_id": team.id,
+    })
+
+
 @router.post("/registers/new", response_model=schema.Inventory)
 def post_obj(new_obj: schema.InventoryCreate, session: SessionDep):
 
-    return crud.create(new_obj, session)
+    return crud.create(stamp_count_owners(new_obj, session), session)
 
 
 @router.get("/registers", response_model=list[schema.Inventory])
@@ -46,7 +68,12 @@ def get_obj_by_id(id_employee: int, session: SessionDep, offset: int = 0, limit:
 
 
 @router.get("/individuals/id/{id_employee}/product/{id_product}", response_model=list[schema.Inventory_InvididualProductAllRegisters])
-def get_obj_by_id(id_employee: int, id_product:int, session: SessionDep):
+def get_obj_by_id(
+    id_employee: int,
+    id_product: int,
+    session: SessionDep,
+    owner: str = Query("assigned"),
+):
 
     existing_obj_employee = crud_empleados.read_by_id(id_employee, session)
     
@@ -58,7 +85,12 @@ def get_obj_by_id(id_employee: int, id_product:int, session: SessionDep):
     if not existing_obj_prod:
         raise HTTPException(status_code=400, detail='El id del producto no existe')
     
-    return crud.read_invidual_code_registers_all(id_employee, id_product, session)
+    return crud.read_invidual_code_registers_all(
+        id_employee,
+        id_product,
+        session,
+        by_counting=owner == "counting",
+    )
 
 
 @router.get("/teams/id/{id_team}", response_model=list[schema.Inventory_TeamRegisters])
