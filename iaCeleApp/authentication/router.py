@@ -82,6 +82,15 @@ def update_assignments(
     if not crud.is_manager(current_user, session):
         raise HTTPException(status_code=403, detail="No puedes reasignar personal")
 
+    from ..inventario.crud import get_inventory_stage
+    from ..inventario.schema import TipoConteo
+
+    if get_inventory_stage(session).stage != TipoConteo.individual:
+        raise HTTPException(
+            status_code=403,
+            detail="Solo en la etapa individual se puede asignar a otra persona",
+        )
+
     return crud.assign_helpers(body.items, session)
 
 

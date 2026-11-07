@@ -29,8 +29,15 @@ def stamp_count_owners(new_obj: schema.InventoryCreate, session: SessionDep) -> 
     if not account or not account.empleado_id:
         raise HTTPException(status_code=400, detail="Quien cuenta no tiene usuario")
 
-    assigned_id = account.assigned_user_id or account.empleado_id
-    team = crud_equipos.read_by_member(assigned_id, session)
+    stage = crud.get_inventory_stage(session).stage
+    counter_id = account.empleado_id
+    if stage == schema.TipoConteo.individual:
+        assigned_id = account.assigned_user_id or counter_id
+        team_member = assigned_id
+    else:
+        assigned_id = None
+        team_member = counter_id
+    team = crud_equipos.read_by_member(team_member, session)
     if not team or not team.id:
         raise HTTPException(
             status_code=400,
@@ -41,13 +48,46 @@ def stamp_count_owners(new_obj: schema.InventoryCreate, session: SessionDep) -> 
         "counting_user_id": account.empleado_id,
         "assigned_user_id": assigned_id,
         "assigned_team_id": team.id,
+        "count_type": crud.get_inventory_stage(session).stage,
     })
+
+
+@router.get("/stage", response_model=schema.InventoryStagePublic)
+def read_stage(session: SessionDep):
+    row = crud.get_inventory_stage(session)
+    return schema.InventoryStagePublic(stage=row.stage)
+
+
+@router.put("/stage", response_model=schema.InventoryStagePublic)
+def update_stage(
+    body: schema.InventoryStagePublic,
+    session: SessionDep,
+    current_user: Annotated[Authentications, Depends(require_user_authenticated)],
+):
+    from ..authentication.crud import is_director_general, restore_original_assignments
+
+    if not is_director_general(current_user, session):
+        raise HTTPException(status_code=403, detail="No puedes cambiar la etapa del inventario")
+
+    current = crud.get_inventory_stage(session)
+    if current.stage == schema.TipoConteo.individual and body.stage != schema.TipoConteo.individual:
+        restore_original_assignments(session)
+        crud.assign_counts_to_counters(session)
+
+    row = crud.set_inventory_stage(body.stage, session)
+    return schema.InventoryStagePublic(stage=row.stage)
 
 
 @router.post("/registers/new", response_model=schema.Inventory)
 def post_obj(new_obj: schema.InventoryCreate, session: SessionDep):
 
-    return crud.create(stamp_count_owners(new_obj, session), session)
+    stamped = stamp_count_owners(new_obj, session)
+    if crud.find_stage_register(stamped, session):
+        raise HTTPException(
+            status_code=409,
+            detail="En esta etapa solo se permite un registro por código.",
+        )
+    return crud.create(stamped, session)
 
 
 @router.get("/registers", response_model=list[schema.Inventory])
@@ -73,6 +113,7 @@ def get_obj_by_id(
     id_product: int,
     session: SessionDep,
     owner: str = Query("assigned"),
+    count_type: schema.TipoConteo | None = None,
 ):
 
     existing_obj_employee = crud_empleados.read_by_id(id_employee, session)
@@ -90,6 +131,7 @@ def get_obj_by_id(
         id_product,
         session,
         by_counting=owner == "counting",
+        count_type=count_type,
     )
 
 
@@ -102,6 +144,16 @@ def get_obj_by__team(id_team: int, session: SessionDep, offset: int = 0, limit:A
         raise HTTPException(status_code=400, detail='El id del equipo no existe')
     
     return crud.read_team_registers_limit(existing_obj, session, offset, limit)
+
+
+@router.get("/teams/id/{id_team}/product/{id_product}", response_model=list[schema.Inventory_InvididualProductAllRegisters])
+def get_team_product(id_team: int, id_product: int, session: SessionDep):
+    existing_obj = crud_equipos.read_by_id(id_team, session)
+    if not existing_obj:
+        raise HTTPException(status_code=400, detail="El id del equipo no existe")
+    if not crud_productos.read_by_id(id_product, session):
+        raise HTTPException(status_code=400, detail="El id del producto no existe")
+    return crud.read_team_product_registers(id_team, id_product, session)
 
 
 @router.delete("/registers")
@@ -127,5 +179,9 @@ def delete_obj(id: int, session: SessionDep):
 
     if not existing_obj:
         raise HTTPException(status_code=400, detail='El id del conteo individual no existe')
+
+    stage = crud.get_inventory_stage(session).stage
+    if existing_obj.count_type == schema.TipoConteo.individual and stage != schema.TipoConteo.individual:
+        raise HTTPException(status_code=403, detail="No se pueden borrar los conteos de la etapa individual.")
 
     return crud.delete(existing_obj, session)

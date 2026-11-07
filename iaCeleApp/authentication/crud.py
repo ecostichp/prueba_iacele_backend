@@ -161,6 +161,25 @@ def take_assignment_notices(empleado_id: int | None, session: Session) -> list[s
     return pending
 
 
+def restore_original_assignments(session: Session) -> None:
+    accounts = session.exec(select(schema.Authentications)).all()
+    for account in accounts:
+        if not account.empleado_id:
+            continue
+        previous = account.assigned_user_id or account.empleado_id
+        account.counting_user_id = account.empleado_id
+        account.assigned_user_id = account.empleado_id
+        session.add(account)
+        if previous == account.empleado_id:
+            continue
+        helper_name = account.empleado.name if account.empleado else "Esta persona"
+        session.add(schema.AssignmentNotice(
+            empleado_id=account.empleado_id,
+            assigned_user_id=account.empleado_id,
+            message=f"{helper_name} vuelve a registrar sus propios conteos.",
+        ))
+
+
 def change_in_authentication(employee_id: int, payload, session: Session):
     from ..empleados.crud import read_by_id as read_employee_by_id
 

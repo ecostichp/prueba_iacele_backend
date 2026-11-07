@@ -18,7 +18,7 @@ class InventoryBase(SQLModel):
     id_products: int = Field(foreign_key="products.id")
     count_qty: float
     assigned_team_id: int = Field(foreign_key="teams.id")
-    assigned_user_id: int = Field(foreign_key="employees.id")
+    assigned_user_id: int | None = Field(default=None, foreign_key="employees.id")
     counting_user_id: int = Field(foreign_key="employees.id")
     count_type: TipoConteo
 
@@ -73,11 +73,22 @@ class Inventory_InvididualProductAllRegisters(SQLModel):
     registers: list[dict]
 
 
+class InventoryStage(SQLModel, table=True):
+    __tablename__ = "inventory_stage"
+    id: int | None = Field(default=None, primary_key=True)
+    stage: TipoConteo = TipoConteo.individual
+
+
+class InventoryStagePublic(SQLModel):
+    stage: TipoConteo
+
+
 class Inventory_TeamRegisters(SQLModel):
     id_products: int
     code: str
     name: str
     total_qty_a: float | None
     total_qty_b: float | None
+    total_qty_equipo: float | None = None
     iguales: bool
     
