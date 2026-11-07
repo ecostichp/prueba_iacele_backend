@@ -52,9 +52,9 @@ def find_stage_register(new_obj: schema.InventoryCreate, session: Session):
     statement = (
         select(schema.Inventory)
         .where(schema.Inventory.id_products == new_obj.id_products)
-        .where(schema.Inventory.count_type == new_obj.count_type)
+        .where(schema.same_count_type(schema.Inventory.count_type, new_obj.count_type))
     )
-    if new_obj.count_type == schema.TipoConteo.equipo:
+    if new_obj.count_type == schema.TipoConteo.diferencias:
         statement = statement.where(schema.Inventory.assigned_team_id == new_obj.assigned_team_id)
     else:
         statement = statement.where(schema.Inventory.counting_user_id == new_obj.counting_user_id)
@@ -226,7 +226,7 @@ def read_invidual_code_registers_all(
             )
             .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
             .where(owner == employee_id)
-            .where(schema.Inventory.count_type == kind)
+            .where(schema.same_count_type(schema.Inventory.count_type, kind))
             .where(schema.Inventory.id_products == id_product)
         )
 
@@ -276,7 +276,7 @@ def read_invidual_registers_limit(employee_id: int, session: Session, offset: in
             .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
             .where(schema.Inventory.assigned_user_id == employee_id)
             .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
-            .where(schema.Inventory.count_type == stage)
+            .where(schema.same_count_type(schema.Inventory.count_type, stage))
             .group_by(
                 schema.Inventory.id_products,
                 schema_productos.Products.code,
@@ -345,7 +345,7 @@ def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offs
             func.sum(schema.Inventory.count_qty).label("total_qty_equipo"),
         )
         .where(schema.Inventory.assigned_team_id == team.id)
-        .where(schema.Inventory.count_type == schema.TipoConteo.equipo)
+        .where(schema.same_count_type(schema.Inventory.count_type, schema.TipoConteo.diferencias))
         .group_by(schema.Inventory.id_products)
     ).subquery()
 
@@ -404,7 +404,7 @@ def read_team_product_registers(team_id: int, id_product: int, session: Session)
         .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
         .where(schema.Inventory.assigned_team_id == team_id)
         .where(schema.Inventory.id_products == id_product)
-        .where(schema.Inventory.count_type == schema.TipoConteo.equipo)
+        .where(schema.same_count_type(schema.Inventory.count_type, schema.TipoConteo.diferencias))
     )
     rows = session.exec(statement).all()
     product = session.get(schema_productos.Products, id_product)

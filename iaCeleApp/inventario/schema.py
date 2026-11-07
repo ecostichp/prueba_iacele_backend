@@ -2,6 +2,7 @@ from typing import Optional
 from datetime import datetime
 from enum import Enum
 from pydantic import field_serializer
+from sqlalchemy import String, TypeDecorator
 from sqlmodel import SQLModel, Field, Relationship
 
 from ..timeutil import as_utc, utc_now
@@ -10,8 +11,38 @@ from ..timeutil import as_utc, utc_now
 class TipoConteo(str, Enum):
     gerente = "gerente"
     doble = "doble"
-    equipo = "equipo"
+    diferencias = "diferencias"
     individual = "individual"
+
+    @classmethod
+    def _missing_(cls, value):
+        # «equipo» es el nombre anterior. Sigue en la base hasta el cambio en PostgreSQL.
+        if value == "equipo":
+            return cls.diferencias
+        return None
+
+
+class CountTypeColumn(TypeDecorator):
+    impl = String(12)
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        if isinstance(value, TipoConteo):
+            return value.value
+        return str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        return TipoConteo(value)
+
+
+def same_count_type(column, kind: TipoConteo):
+    if kind == TipoConteo.diferencias:
+        return column.in_((TipoConteo.diferencias.value, "equipo"))
+    return column == kind
 
 
 class InventoryBase(SQLModel):
@@ -20,7 +51,7 @@ class InventoryBase(SQLModel):
     assigned_team_id: int = Field(foreign_key="teams.id")
     assigned_user_id: int | None = Field(default=None, foreign_key="employees.id")
     counting_user_id: int = Field(foreign_key="employees.id")
-    count_type: TipoConteo
+    count_type: TipoConteo = Field(sa_type=CountTypeColumn())
 
 
 class InventoryCreate(InventoryBase):
@@ -76,7 +107,7 @@ class Inventory_InvididualProductAllRegisters(SQLModel):
 class InventoryStage(SQLModel, table=True):
     __tablename__ = "inventory_stage"
     id: int | None = Field(default=None, primary_key=True)
-    stage: TipoConteo = TipoConteo.individual
+    stage: TipoConteo = Field(default=TipoConteo.individual, sa_type=CountTypeColumn())
 
 
 class InventoryStagePublic(SQLModel):
