@@ -139,7 +139,7 @@ def read_invidual_code_registers_all(
 ):
 
     kind = count_type or get_inventory_stage(session).stage
-    owner = schema.Inventory.counting_user_id if by_counting or kind != schema.TipoConteo.individual else schema.Inventory.assigned_user_id
+    owner = schema.Inventory.assigned_user_id if not by_counting else schema.Inventory.counting_user_id
     statement = (
             select(
                 schema.Inventory,
@@ -149,6 +149,7 @@ def read_invidual_code_registers_all(
             )
             .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
             .where(owner == employee_id)
+            .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
             .where(schema.Inventory.count_type == kind)
             .where(schema.Inventory.id_products == id_product)
         )
@@ -188,7 +189,6 @@ def read_invidual_code_registers_all(
 def read_invidual_registers_limit(employee_id: int, session: Session, offset: int, limit: int|None):
 
     stage = get_inventory_stage(session).stage
-    owner = schema.Inventory.counting_user_id if stage != schema.TipoConteo.individual else schema.Inventory.assigned_user_id
     statement = (
             select(
                 schema.Inventory.id_products,
@@ -198,7 +198,8 @@ def read_invidual_registers_limit(employee_id: int, session: Session, offset: in
                 func.max(schema.Inventory.date_create).label("last_count"),
             )
             .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
-            .where(owner == employee_id)
+            .where(schema.Inventory.assigned_user_id == employee_id)
+            .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
             .where(schema.Inventory.count_type == stage)
             .group_by(
                 schema.Inventory.id_products,
@@ -229,6 +230,7 @@ def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offs
         )
         .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
         .where(schema.Inventory.assigned_user_id == empleado_id_a)
+        .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
         .where(schema.Inventory.assigned_team_id == team.id)
         .where(schema.Inventory.count_type == schema.TipoConteo.individual)
         .group_by(
@@ -248,6 +250,7 @@ def read_team_registers_limit(team: schema_equipos.Teams, session: Session, offs
         )
         .join(schema_productos.Products, schema.Inventory.id_products == schema_productos.Products.id)
         .where(schema.Inventory.assigned_user_id == empleado_id_b)
+        .where(schema.Inventory.assigned_user_id == schema.Inventory.counting_user_id)
         .where(schema.Inventory.assigned_team_id == team.id)
         .where(schema.Inventory.count_type == schema.TipoConteo.individual)
         .group_by(
