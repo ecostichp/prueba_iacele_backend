@@ -82,6 +82,15 @@ def update_stage(
 def post_obj(new_obj: schema.InventoryCreate, session: SessionDep):
 
     stamped = stamp_count_owners(new_obj, session)
+    if stamped.count_qty < 0 or (
+        stamped.count_type == schema.TipoConteo.individual and stamped.count_qty == 0
+    ):
+        detail = (
+            "En la etapa individual no se guarda cero. Borra el registro."
+            if stamped.count_type == schema.TipoConteo.individual
+            else "La cantidad no puede ser negativa."
+        )
+        raise HTTPException(status_code=400, detail=detail)
     if crud.find_stage_register(stamped, session):
         raise HTTPException(
             status_code=409,
@@ -133,6 +142,11 @@ def get_obj_by_id(
         by_counting=owner == "counting",
         count_type=count_type,
     )
+
+
+@router.get("/two-counts", response_model=list[schema.InventoryTwoCount])
+def get_codes_with_two_counts(session: SessionDep):
+    return crud.read_codes_with_two_counts(session)
 
 
 @router.get("/teams/id/{id_team}", response_model=list[schema.Inventory_TeamRegisters])

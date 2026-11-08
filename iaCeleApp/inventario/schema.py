@@ -114,6 +114,16 @@ class InventoryStagePublic(SQLModel):
     stage: TipoConteo
 
 
+class InventoryTwoCount(SQLModel):
+    id_products: int
+    code: str
+    name: str
+    registros: int
+    individuales: int
+    diferencias: int
+    dobles: bool
+
+
 class Inventory_TeamRegisters(SQLModel):
     id_products: int
     code: str
