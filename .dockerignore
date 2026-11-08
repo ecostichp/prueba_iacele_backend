@@ -14,11 +14,13 @@ env/
 *.local
 
 # --- Archivos de Base de Datos y Pruebas Locales ---
-# SQLite local vive en dbLocalTests/dbLocal y no entra a la imagen.
+# Las pruebas locales no entran. La base de iaCeleApp/database sí:
+# es la que sirve Cloud Run, y al reiniciar vuelve a esta copia.
 dbLocalTests/
 *.db
 *.sqlite
 *.sqlite3
+!iaCeleApp/database/local_iaCele.db
 
 # --- Cuadernos de Jupyter ---
 **/*.ipynb

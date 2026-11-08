@@ -1,0 +1,10 @@
+1.- Productos olvidados, caso irma, evelyn, bolsas de estopa de CarlosG. En qué etapa ponerlos?
+2.- corregir schema y derivados de diferentes/equipo
+3.- logica de diferentes, checar bien la sumatoria y el merge
+4.- logica de dobles, ver por código, no por etapa anterior para evitar arrastrar un posible problema
+5.- logica gerentes
+6.- Estapa finalizado
+
+
+*Cómo mejorar el trabajo de la dblocal cuando andas en producción, ocupas bajar los registros que se están haciendo.
+*Como mejorar trabajar local back con sqlite, local back con postgresql google, local front con local back, local front con back google

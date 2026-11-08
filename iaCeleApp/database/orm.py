@@ -1,84 +1,36 @@
-from pathlib import Path
 from typing import Annotated
 from fastapi import Depends
 from sqlmodel import create_engine, Session, SQLModel
 from sqlalchemy.engine.url import URL
 
-from .config import settings
+from .config import dbConfig
 
 
-def cloudsql_instance_name() -> str:
-    name = settings.gcloud_sql_name.strip().strip('"').strip("'")
-    if name.startswith("/cloudsql/"):
-        name = name[len("/cloudsql/"):]
-    suffix = "/.s.PGSQL.5432"
-    if name.endswith(suffix):
-        name = name[: -len(suffix)]
-    return name
+# ---> Experimental Mode:
+# Aplicación en modo Local.
+# Base de datos Local SQLite.
+# Conexión local entre aplicación y database.
+db_file = 'local_iaCele.db'
+SQLALCHEMY_DATABASE_URL = f"sqlite:///./iaCeleApp/database/{db_file}"
+engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} )
 
 
-def build_engine():
-    mode = settings.db_mode.strip().lower()
 
-    if mode == "sqlite":
-        db_path = Path(__file__).resolve().parents[2] / "dbLocalTests" / "dbLocal" / "local_iaCele.db"
-        db_path.parent.mkdir(parents=True, exist_ok=True)
-        print(f"DB_MODE=sqlite ({db_path})")
-        return create_engine(
-            f"sqlite:///{db_path.as_posix()}",
-            connect_args={"check_same_thread": False, "timeout": 30},
-        )
-
-    if mode == "postgres":
-        print(f"DB_MODE=postgres ({settings.gcloud_sql_ip}/{settings.gcloud_sql_db})")
-        return create_engine(
-            URL.create(
-                drivername="postgresql+psycopg2",
-                username=settings.gcloud_sql_user,
-                password=settings.gcloud_sql_password,
-                host=settings.gcloud_sql_ip,
-                port=5432,
-                database=settings.gcloud_sql_db,
-                query={
-                    "gssencmode": "disable",
-                    "sslnegotiation": "postgres",
-                },
-            ),
-            pool_pre_ping=True,
-        )
-
-    if mode == "cloudsql":
-        from google.cloud.sql.connector import Connector
-
-        instance = cloudsql_instance_name()
-        connector = Connector(ip_type="public", refresh_strategy="background")
-
-        def getconn():
-            return connector.connect(
-                instance,
-                "psycopg",
-                user=settings.gcloud_sql_user,
-                password=settings.gcloud_sql_password,
-                db=settings.gcloud_sql_db,
-            )
-
-        print(f"DB_MODE=cloudsql ({instance}/{settings.gcloud_sql_db})")
-        return create_engine(
-            "postgresql+psycopg://",
-            creator=getconn,
-            pool_pre_ping=True,
-            pool_size=8,
-            max_overflow=8,
-            pool_timeout=20,
-            pool_recycle=1800,
-        )
-
-    raise RuntimeError(
-        f"DB_MODE '{settings.db_mode}' no es válido. Usa sqlite, postgres o cloudsql."
-    )
+# # ---> Development Mode:
+# # Aplicación en modo Local.
+# # Base de datos remota PostgreSQL en GCloudSQL.
+# # Conexión remota entre aplicación y database.
+# from urllib.parse import quote_plus
+# password = quote_plus(dbConfig['password'])
+# dbURL = f"postgresql+psycopg2://{dbConfig['username']}:{password}@{dbConfig['sql_ip_public']}/{dbConfig['database']}"
+# engine = create_engine(dbURL)
 
 
-engine = build_engine()
+# # ---> Production Mode:
+# # Aplicación en modo remoto en GCloud Run, contenerizada en Docker.
+# # Base de datos remota PostgreSQL en GCloudSQL.
+# # Conexión local entre aplicación y database (Unix_Socket entre servidores).
+# engine = create_engine(URL.create(**dbConfig))
 
 
 def create_db_and_tables():
@@ -89,4 +41,3 @@ def get_session():
         yield session
 
 SessionDep = Annotated[Session, Depends(get_session)]
-
