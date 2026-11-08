@@ -14,13 +14,6 @@ class TipoConteo(str, Enum):
     diferencias = "diferencias"
     individual = "individual"
 
-    @classmethod
-    def _missing_(cls, value):
-        # «equipo» es el nombre anterior. Sigue en la base hasta el cambio en PostgreSQL.
-        if value == "equipo":
-            return cls.diferencias
-        return None
-
 
 class CountTypeColumn(TypeDecorator):
     impl = String(12)
@@ -40,8 +33,6 @@ class CountTypeColumn(TypeDecorator):
 
 
 def same_count_type(column, kind: TipoConteo):
-    if kind == TipoConteo.diferencias:
-        return column.in_((TipoConteo.diferencias.value, "equipo"))
     return column == kind
 
 
@@ -112,16 +103,6 @@ class InventoryStage(SQLModel, table=True):
 
 class InventoryStagePublic(SQLModel):
     stage: TipoConteo
-
-
-class InventoryTwoCount(SQLModel):
-    id_products: int
-    code: str
-    name: str
-    registros: int
-    individuales: int
-    diferencias: int
-    dobles: bool
 
 
 class Inventory_TeamRegisters(SQLModel):

@@ -144,11 +144,6 @@ def get_obj_by_id(
     )
 
 
-@router.get("/two-counts", response_model=list[schema.InventoryTwoCount])
-def get_codes_with_two_counts(session: SessionDep):
-    return crud.read_codes_with_two_counts(session)
-
-
 @router.get("/teams/id/{id_team}", response_model=list[schema.Inventory_TeamRegisters])
 def get_obj_by__team(id_team: int, session: SessionDep, offset: int = 0, limit:Annotated[int|None, Query(le=100)] = None):
 
