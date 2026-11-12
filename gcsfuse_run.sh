@@ -24,10 +24,11 @@ echo "Mount directory: $MOUNT_DIR"
 # Montar Google Cloud Storage
 echo "Mounting Google Cloud Storage..."
 
-gcsfuse \
-    --implicit-dirs \
-    "$BUCKET_NAME" \
-    "$MOUNT_DIR"
+# Descomentar para montar el bucket, en este momento el bucket no existe.
+# gcsfuse \
+#     --implicit-dirs \
+#     "$BUCKET_NAME" \
+#     "$MOUNT_DIR"
 
 # Verificar montaje
 if ! mountpoint -q "$MOUNT_DIR"; then

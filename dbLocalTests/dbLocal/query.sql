@@ -4,3 +4,5 @@
 -- DROP TABLE teams;
 -- DROP TABLE products;
 -- DROP TABLE inventory;
+
+SELECT * FROM registros_yeni;

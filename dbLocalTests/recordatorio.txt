@@ -4,6 +4,8 @@
 4.- logica de dobles, ver por código, no por etapa anterior para evitar arrastrar un posible problema
 5.- logica gerentes
 6.- Estapa finalizado
+7.- Bug que mi hermana encontró: pueden registrar más cosas en etapa 2. Ver tema 1 de productos olvidados? será la solución?
+8.- 2 decimales únicamente, caso Carlos y Wendy con los clavos. Caso "id_products": 13404. "id_products": 10520,
 
 
 *Cómo mejorar el trabajo de la dblocal cuando andas en producción, ocupas bajar los registros que se están haciendo.
