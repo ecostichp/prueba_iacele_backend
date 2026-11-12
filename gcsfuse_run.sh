@@ -24,19 +24,19 @@ echo "Mount directory: $MOUNT_DIR"
 # Montar Google Cloud Storage
 echo "Mounting Google Cloud Storage..."
 
-# Descomentar para montar el bucket, en este momento el bucket no existe.
+# # Descomentar para montar el bucket, en este momento el bucket no existe.
 # gcsfuse \
 #     --implicit-dirs \
 #     "$BUCKET_NAME" \
 #     "$MOUNT_DIR"
 
-# Verificar montaje
-if ! mountpoint -q "$MOUNT_DIR"; then
-    echo "ERROR: Falló la verificación de montaje de GCSFuse."
-    exit 1
-fi
+# # Verificar montaje
+# if ! mountpoint -q "$MOUNT_DIR"; then
+#     echo "ERROR: Falló la verificación de montaje de GCSFuse."
+#     exit 1
+# fi
 
-echo "GCSFuse mounted successfully."
+# echo "GCSFuse mounted successfully."
 
 # En el contenedor la app usa el conector de Cloud SQL, no el socket de Cloud Run.
 export DB_MODE=cloudsql
